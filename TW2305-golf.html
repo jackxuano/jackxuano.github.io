@@ -42,8 +42,8 @@ html,body{background:#e8e3da;font-family:'DM Sans',sans-serif;color:var(--text)}
 .spill{padding:3px 9px;border-radius:99px;font-size:8px;font-weight:700;letter-spacing:.1em;white-space:nowrap}
 
 /* SPLIT — image left, info right, strict 50/50 */
-.split{display:grid;grid-template-columns:1fr 1fr;min-height:360px}
-.img-col{overflow:hidden;background:#111}
+.split{display:flex;flex-direction:row;min-height:360px}
+.img-col{width:50%;min-width:50%;flex-shrink:0;overflow:hidden;background:#111}
 .img-col img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
 
 /* RIGHT COL — tightly spaced, small text */
