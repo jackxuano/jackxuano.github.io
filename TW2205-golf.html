@@ -138,6 +138,14 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
   .hole-nav-btns{display:none}
   @page{size:A4 portrait;margin:10mm}
 }
+
+/* ── ONE-HOLE-AT-A-TIME VIEW ────────────────────────── */
+.hole-section        { display: none; }
+.hole-section.active { display: block; animation: hfade .18s ease; }
+@keyframes hfade     { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
+/* Hole counter pill in nav area */
+#hole-counter        { text-align:center; padding:6px 0 2px; font-size:.78em; color:#4b5563; letter-spacing:.05em; }
+
 </style>
 </head>
 <body>
@@ -166,10 +174,10 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
       <span class="meta-pill">🔵 Blue Tees · <strong>6,796y</strong></span>
     </div>
     <div class="weather-block">
-      <div class="wx-item">☀️ <strong>Mainly clear</strong></div>
-      <div class="wx-item">🌡️ <strong>28.5°C</strong> <span style="color:#94a3b8">/ feels 33.9°C</span></div>
-      <div class="wx-item">💧 <strong>21%</strong> rain chance</div>
-      <div class="wx-item">🌬️ <strong class="wind-badge">24 km/h WSW (244°)</strong></div>
+      <div class="wx-item" id="wx-desc">☀️ <strong>Mainly clear</strong></div>
+      <div class="wx-item" id="wx-temp">🌡️ <strong>28.5°C</strong> <span style="color:#94a3b8">/ feels 33.9°C</span></div>
+      <div class="wx-item" id="wx-rain">💧 <strong>21%</strong> rain chance</div>
+      <div class="wx-item" id="wx-wind">🌬️ <strong class="wind-badge">24 km/h WSW (244°)</strong></div>
       <div class="wx-item" style="color:#94a3b8;font-size:.9em">Coastal course — WSW strait wind. Factor wind into club selection on open holes.</div>
     </div>
     <div class="maintenance-note">⚠️ <strong>Note:</strong> Hole 15 currently closed for maintenance. <strong>Hole 10A</strong> (par 3, 167y) substitutes as the 18th playing hole today. Check with the starter for current routing.</div>
@@ -177,6 +185,7 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
 </div>
 
 <div id="hole-nav"><a href="#hole1" class="nav-item" data-h="1" onclick="setActiveNav('1')">H1<span class="nav-par">4</span></a><a href="#hole2" class="nav-item" data-h="2" onclick="setActiveNav('2')">H2<span class="nav-par">4</span></a><a href="#hole3" class="nav-item" data-h="3" onclick="setActiveNav('3')">H3<span class="nav-par">3</span></a><a href="#hole4" class="nav-item" data-h="4" onclick="setActiveNav('4')">H4<span class="nav-par">5</span></a><a href="#hole5" class="nav-item" data-h="5" onclick="setActiveNav('5')">H5<span class="nav-par">5</span></a><a href="#hole6" class="nav-item" data-h="6" onclick="setActiveNav('6')">H6<span class="nav-par">4</span></a><a href="#hole7" class="nav-item" data-h="7" onclick="setActiveNav('7')">H7<span class="nav-par">4</span></a><a href="#hole8" class="nav-item" data-h="8" onclick="setActiveNav('8')">H8<span class="nav-par">3</span></a><a href="#hole9" class="nav-item" data-h="9" onclick="setActiveNav('9')">H9<span class="nav-par">5</span></a><a href="#hole10" class="nav-item" data-h="10" onclick="setActiveNav('10')">H10<span class="nav-par">4</span></a><a href="#hole11" class="nav-item" data-h="11" onclick="setActiveNav('11')">H11<span class="nav-par">5</span></a><a href="#hole12" class="nav-item" data-h="12" onclick="setActiveNav('12')">H12<span class="nav-par">4</span></a><a href="#hole13" class="nav-item" data-h="13" onclick="setActiveNav('13')">H13<span class="nav-par">3</span></a><a href="#hole14" class="nav-item" data-h="14" onclick="setActiveNav('14')">H14<span class="nav-par">4</span></a><a href="#hole16" class="nav-item" data-h="16" onclick="setActiveNav('16')">H16<span class="nav-par">3</span></a><a href="#hole17" class="nav-item" data-h="17" onclick="setActiveNav('17')">H17<span class="nav-par">5</span></a><a href="#hole18" class="nav-item" data-h="18" onclick="setActiveNav('18')">H18<span class="nav-par">4</span></a><a href="#hole10A" class="nav-item" data-h="10A" onclick="setActiveNav('10A')">10A<span class="nav-par">3</span></a></div>
+<div id="hole-counter"></div>
 
 <div id="scorecard-section">
   <div class="sc-title">📊 Official Scorecard — Blue / White / Red Tees</div>
@@ -250,10 +259,8 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
     <div class="caddie-panel">
       <div class="caddie-course-note">Par 3 at 235y — long but manageable with the right club. WSW wind could be into or across you. Large green: aim centre, give yourself a putt not a chip.</div>
       <div class="shot-plan-title">📋 Shot Strategy (Blue 235y)</div>
-      <div class="shot-row"><div class="shot-num">Shot 1</div><div class="club-badge badge-chip">🏌️ Chip/Pitch</div><div class="shot-note">Long par 3 at 235y — this may be beyond a single fairway wood. Play for the front of the green or a comfortable layup distance, then chip on. Do not force a heroic shot.</div></div><div class="shot-row"><div class="shot-num">Shot 2</div><div class="club-badge badge-chip">🌀 Chip/Pitch</div><div class="shot-note">Short approach or chip onto the green. Focus on accuracy over distance.</div></div>
-    </div>
-  </div>
-  <div class="hole-nav-btns">
+      <div class="shot-row"><div class="shot-num">Shot 1</div><div class="club-badge badge-approach">⛳ Long Iron</div><div class="shot-note">Long iron tee shot — 235y par 3. This requires a full long-iron or fairway wood. Club up for the wind; aim for the front-centre of the large green.</div></div><div class="shot-row"><div class="shot-num">Shot 2</div><div class="club-badge badge-chip">🌀 Chip/Pitch</div><div class="shot-note">Chip or pitch onto the green if you fell short. Large greens — land it on and two-putt is very achievable.</div></div>
+    <div class="hole-nav-btns">
     <button class="nav-btn" onclick="goHole('2')">← H2</button>
     <button class="nav-btn" onclick="goHole('4')">H4 →</button>
   </div>
@@ -365,10 +372,8 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
     <div class="caddie-panel">
       <div class="caddie-course-note">Par 3 at 186y. A single iron or fairway wood. This course has enormous greens — go one club more than instinct says, aim for the centre.</div>
       <div class="shot-plan-title">📋 Shot Strategy (Blue 186y)</div>
-      <div class="shot-row"><div class="shot-num">Shot 1</div><div class="club-badge badge-chip">🏌️ Chip/Pitch</div><div class="shot-note">Mid-length par 3 at 186y — a fairway wood or long iron depending on wind. This course has very large greens; aim for the centre and let the ball find the flag.</div></div>
-    </div>
-  </div>
-  <div class="hole-nav-btns">
+      <div class="shot-row"><div class="shot-num">Shot 1</div><div class="club-badge badge-approach">⛳ Long Iron</div><div class="shot-note">186y par 3 — a long iron to the green. Pick enough club to carry the full distance; these large greens are very forgiving. Aim for the centre.</div></div>
+    <div class="hole-nav-btns">
     <button class="nav-btn" onclick="goHole('7')">← H7</button>
     <button class="nav-btn" onclick="goHole('9')">H9 →</button>
   </div>
@@ -480,10 +485,8 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
     <div class="caddie-panel">
       <div class="caddie-course-note">Short par 3 at 184y. A mid-iron to the big green. HCP 14 — should be manageable. Aim centre, avoid back bunkers.</div>
       <div class="shot-plan-title">📋 Shot Strategy (Blue 184y)</div>
-      <div class="shot-row"><div class="shot-num">Shot 1</div><div class="club-badge badge-chip">🏌️ Chip/Pitch</div><div class="shot-note">Mid-length par 3 at 184y — a fairway wood or long iron depending on wind. This course has very large greens; aim for the centre and let the ball find the flag.</div></div>
-    </div>
-  </div>
-  <div class="hole-nav-btns">
+      <div class="shot-row"><div class="shot-num">Shot 1</div><div class="club-badge badge-approach">⛳ Long Iron</div><div class="shot-note">184y par 3 — a long iron to the green. HCP 14 so it's meant to be manageable. Take one extra club for the WSW coastal wind, aim for the centre of the big green.</div></div>
+    <div class="hole-nav-btns">
     <button class="nav-btn" onclick="goHole('12')">← H12</button>
     <button class="nav-btn" onclick="goHole('14')">H14 →</button>
   </div>
@@ -526,10 +529,8 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
     <div class="caddie-panel">
       <div class="caddie-course-note">Par 3 at 186y — check for water/hazards on this hole. Take an extra club to be safe. Large green: landing anywhere on the surface is a win.</div>
       <div class="shot-plan-title">📋 Shot Strategy (Blue 186y)</div>
-      <div class="shot-row"><div class="shot-num">Shot 1</div><div class="club-badge badge-chip">🏌️ Chip/Pitch</div><div class="shot-note">Mid-length par 3 at 186y — a fairway wood or long iron depending on wind. This course has very large greens; aim for the centre and let the ball find the flag.</div></div>
-    </div>
-  </div>
-  <div class="hole-nav-btns">
+      <div class="shot-row"><div class="shot-num">Shot 1</div><div class="club-badge badge-approach">⛳ Long Iron</div><div class="shot-note">186y par 3 — long iron to the green. There is water/hazard on this hole so DO NOT be short. Take an extra club, aim for the safe centre of the green.</div></div>
+    <div class="hole-nav-btns">
     <button class="nav-btn" onclick="goHole('14')">← H14</button>
     <button class="nav-btn" onclick="goHole('17')">H17 →</button>
   </div>
@@ -595,10 +596,8 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
     <div class="caddie-panel">
       <div class="caddie-course-note">Bonus hole 10A — par 3 at 167y. Short and tight. Pick a conservative club, aim for the centre of the green, and enjoy the extra hole.</div>
       <div class="shot-plan-title">📋 Shot Strategy (Blue 167y)</div>
-      <div class="shot-row"><div class="shot-num">Shot 1</div><div class="club-badge badge-chip">🏌️ Chip/Pitch</div><div class="shot-note">Mid-length par 3 at 167y — a fairway wood or long iron depending on wind. This course has very large greens; aim for the centre and let the ball find the flag.</div></div>
-    </div>
-  </div>
-  <div class="hole-nav-btns">
+      <div class="shot-row"><div class="shot-num">Shot 1</div><div class="club-badge badge-approach">⛳ Long Iron</div><div class="shot-note">167y par 3 bonus hole — a mid-to-long iron to the green. Short and straightforward. Aim for the centre and enjoy the extra hole.</div></div>
+    <div class="hole-nav-btns">
     <button class="nav-btn" onclick="goHole('18')">← H18</button>
     <span></span>
   </div>
@@ -607,77 +606,106 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
 </div><!-- /#app -->
 
 <script>
-// ── GPS coordinate lookup for all holes ───────────────────────────────────
+// ── GPS coordinate lookup ────────────────────────────────────────────────
 const GPS_PTS = {"1":[[24.88214213845446,121.08811382771455],[24.8816768024731,121.09050366826158],[24.88117948342422,121.09161095200875]],"2":[[24.88158646502813,121.09186441307544],[24.88075672589702,121.09412685638837],[24.88070834044259,121.0954420113344]],"3":[[24.8809905984905,121.09577728747034],[24.8819842726937,121.09395827348794]],"4":[[24.88206763182012,121.09345535161243],[24.88230608862528,121.0910225880448],[24.88253265980425,121.08882404918131]],"5":[[24.88201987720301,121.08765593947008],[24.88114512580811,121.0898982662154],[24.88033819155974,121.09168011783574]],"6":[[24.8809203706035,121.09206768935302],[24.87966237004984,121.09408202833218],[24.8796577825324,121.09501362738908]],"7":[[24.87822884996593,121.09581023578122],[24.87889557527182,121.0934753728427],[24.87827901099644,121.09282715078987]],"8":[[24.87785502687617,121.09245833936507],[24.87909264150712,121.091505686589]],"9":[[24.87964499791893,121.09176720197706],[24.8804522576114,121.08949133994248],[24.88159130147868,121.0875274943678]],"10":[[24.88223795527153,121.08717879951061],[24.88020375690947,121.0862078398561],[24.87946796894103,121.08603168658988]],"11":[[24.8791668702126,121.08629319428346],[24.87821670758996,121.08850331913212],[24.87738839859537,121.09118909827336]],"12":[[24.87680259450427,121.0914090317273],[24.87683057790466,121.09385654746234],[24.87695495538147,121.09462184956034]],"13":[[24.87739295503223,121.0941725795593],[24.87724786193789,121.09578947532506]],"14":[[24.87781423897282,121.0961354726027],[24.87806365390027,121.09370807345317],[24.87741180171799,121.09259180592723]],"16":[[24.87887760453128,121.08835476515651],[24.87979766685287,121.08689517487643]],"17":[[24.88063714549623,121.08696491231977],[24.87929095613272,121.08891084727475],[24.87883499209597,121.09088448453393]],"18":[[24.87937639986405,121.09115538765354],[24.88002063197525,121.08881649370711],[24.88083605623557,121.08740518318949]]};
 const _mapInstances = {};
 const _mapInitDone  = {};
 
-// ── Render a single Leaflet map ───────────────────────────────────────────
+// ── Hole order (matches scorecard) ───────────────────────────────────────
+const HOLE_ORDER = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","16","17","18","10A"];
+let _currentHole = HOLE_ORDER[0];
+
+// ── Render a single Leaflet map ──────────────────────────────────────────
 function renderMap(holeKey) {
-  if (_mapInitDone[holeKey]) return;
+  if (_mapInitDone[holeKey]) {
+    // Already inited — just invalidate so tiles repaint correctly
+    const m = _mapInstances[holeKey];
+    if (m) {
+      setTimeout(() => m.invalidateSize({ pan:false, animate:false }), 60);
+      setTimeout(() => m.invalidateSize({ pan:false, animate:false }), 300);
+    }
+    return;
+  }
   const el = document.getElementById('map' + holeKey);
   if (!el) return;
-
-  // Ensure the container has real dimensions before init
-  const rect = el.getBoundingClientRect();
-  if (rect.width === 0 || rect.height === 0) {
-    // Force explicit size via inline style as fallback
-    el.style.height = '300px';
-    el.style.width  = '100%';
-    el.style.display = 'block';
-  }
-
   const pts = GPS_PTS[holeKey];
   if (!pts || pts.length < 2) return;
+
+  // Ensure element has real dimensions
+  if (el.offsetWidth === 0 || el.offsetHeight === 0) {
+    el.style.height  = '300px';
+    el.style.width   = '100%';
+    el.style.display = 'block';
+  }
 
   _mapInitDone[holeKey] = true;
   el.classList.remove('map-loading');
 
   const map = L.map(el, {
-    zoomControl: true,
-    attributionControl: false,
-    scrollWheelZoom: false,
-    tap: true           // important for iOS touch
+    zoomControl: true, attributionControl: false,
+    scrollWheelZoom: false, tap: true
   });
-
   L.tileLayer(
     'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     { maxZoom: 20, tileSize: 256 }
   ).addTo(map);
 
-  L.polyline(pts, { color: 'white', weight: 3, opacity: .85 }).addTo(map);
-
-  L.circleMarker(pts[0], { radius: 8, color: '#FF6B35', fillColor: '#FF6B35', fillOpacity: .95, weight: 2 })
-    .bindTooltip('Tee', { permanent: true, direction: 'right', className: 'map-tip' }).addTo(map);
-
+  L.polyline(pts, { color:'white', weight:3, opacity:.85 }).addTo(map);
+  L.circleMarker(pts[0], { radius:8, color:'#FF6B35', fillColor:'#FF6B35', fillOpacity:.95, weight:2 })
+    .bindTooltip('Tee', { permanent:true, direction:'right', className:'map-tip' }).addTo(map);
   if (pts.length === 3) {
-    L.circleMarker(pts[1], { radius: 6, color: '#FFD700', fillColor: '#FFD700', fillOpacity: .85, weight: 2 }).addTo(map);
+    L.circleMarker(pts[1], { radius:6, color:'#FFD700', fillColor:'#FFD700', fillOpacity:.85, weight:2 }).addTo(map);
   }
-
-  L.circleMarker(pts[pts.length - 1], { radius: 8, color: '#4CAF50', fillColor: '#4CAF50', fillOpacity: .95, weight: 2 })
-    .bindTooltip('Green', { permanent: true, direction: 'left', className: 'map-tip' }).addTo(map);
+  L.circleMarker(pts[pts.length-1], { radius:8, color:'#4CAF50', fillColor:'#4CAF50', fillOpacity:.95, weight:2 })
+    .bindTooltip('Green', { permanent:true, direction:'left', className:'map-tip' }).addTo(map);
 
   const fg = L.featureGroup(pts.map(p => L.marker(p)));
   map.fitBounds(fg.getBounds().pad(0.42));
 
-  // CRITICAL: invalidateSize after a short delay so Leaflet recalculates
-  // container dimensions (fixes the grey-tile / blank map on mobile)
-  setTimeout(() => { map.invalidateSize(true); }, 100);
-  setTimeout(() => { map.invalidateSize(true); }, 500);
+  setTimeout(() => map.invalidateSize({ pan:false, animate:false }), 80);
+  setTimeout(() => map.invalidateSize({ pan:false, animate:false }), 400);
 
   _mapInstances[holeKey] = map;
 }
 
-// ── Password gate ─────────────────────────────────────────────────────────
+// ── Core: show one hole ───────────────────────────────────────────────────
+function showHole(h, pushState) {
+  // Hide current
+  const prev = document.querySelector('.hole-section.active');
+  if (prev) prev.classList.remove('active');
+
+  // Show new
+  const next = document.getElementById('hole' + h);
+  if (!next) return;
+  next.classList.add('active');
+  _currentHole = h;
+
+  // Scroll to top of hole section (below sticky nav)
+  const navH = (document.getElementById('hole-nav') || {}).offsetHeight || 0;
+  const scH  = (document.getElementById('scorecard-section') || {}).offsetHeight || 0;
+  window.scrollTo({ top: 0, behavior: 'instant' });
+
+  // Nav highlight
+  setActiveNav(h);
+
+  // Hole counter
+  const idx = HOLE_ORDER.indexOf(h);
+  const counter = document.getElementById('hole-counter');
+  if (counter) counter.textContent = 'Hole ' + (idx+1) + ' of ' + HOLE_ORDER.length;
+
+  // Init or revalidate map
+  requestAnimationFrame(() => { setTimeout(() => renderMap(h), 80); });
+}
+
+// ── Password gate ────────────────────────────────────────────────────────
 function showApp() {
   document.getElementById('gate').style.display = 'none';
   document.getElementById('app').style.display  = 'block';
-  // Wait for layout to paint, then start lazy map loading
+  // Collapse scorecard by default on mobile for cleaner entry
   requestAnimationFrame(() => {
-    setTimeout(setupLazyMaps, 150);
+    showHole(HOLE_ORDER[0]);
   });
 }
-
 function checkPw() {
   const v = document.getElementById('pw-input').value.trim();
   if (v === 'buyjackabeer') {
@@ -690,73 +718,90 @@ function checkPw() {
   }
 }
 if (sessionStorage.getItem('tsg_auth') === '1') {
-  document.addEventListener('DOMContentLoaded', showApp);
-  // Also try immediately in case DOM is already ready
-  if (document.readyState !== 'loading') showApp();
-}
-
-// ── Lazy map initialisation via IntersectionObserver ─────────────────────
-// Maps only initialise when they scroll into view — much better for mobile
-// performance and avoids the 0×0 dimension problem entirely
-function setupLazyMaps() {
-  const mapEls = document.querySelectorAll('.leaflet-map[data-gps]');
-
-  if ('IntersectionObserver' in window) {
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const holeKey = entry.target.closest('.hole-section').dataset.hole;
-          renderMap(holeKey);
-          obs.unobserve(entry.target); // only init once
-        }
-      });
-    }, { rootMargin: '200px 0px', threshold: 0 });
-
-    mapEls.forEach(el => {
-      el.classList.add('map-loading');
-      obs.observe(el);
-    });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', showApp);
   } else {
-    // Fallback: init all maps immediately for browsers without IntersectionObserver
-    mapEls.forEach(el => {
-      const holeKey = el.closest('.hole-section').dataset.hole;
-      renderMap(holeKey);
-    });
-  }
-
-  // Also force-render whichever hole is currently in view
-  const visible = document.querySelector('.hole-section');
-  if (visible) {
-    setTimeout(() => renderMap(visible.dataset.hole), 300);
+    showApp();
   }
 }
 
-// ── Navigation ────────────────────────────────────────────────────────────
+// ── goHole: used by prev/next buttons and nav clicks ─────────────────────
 function goHole(h) {
-  const el = document.getElementById('hole' + h);
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  setActiveNav(h);
-  // Ensure map renders when navigated to
-  setTimeout(() => renderMap(h), 400);
+  showHole(String(h));
 }
+
+// ── Nav highlight ────────────────────────────────────────────────────────
 function setActiveNav(h) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const a = document.querySelector('[data-h="' + h + '"]');
-  if (a) { a.classList.add('active'); a.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); }
+  if (a) a.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+  if (a) a.classList.add('active');
 }
 
-// Scroll spy for active nav
-const obs2 = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) setActiveNav(e.target.dataset.hole); });
-}, { threshold: 0.25, rootMargin: '-60px 0px -60% 0px' });
-document.querySelectorAll('.hole-section').forEach(s => obs2.observe(s));
-
-// Force invalidateSize on all initialised maps when window resizes (orientation change on mobile)
+// ── Resize / orientation change ──────────────────────────────────────────
 window.addEventListener('resize', () => {
-  Object.keys(_mapInstances).forEach(k => {
-    setTimeout(() => _mapInstances[k].invalidateSize(true), 300);
-  });
+  const m = _mapInstances[_currentHole];
+  if (m) setTimeout(() => m.invalidateSize({ pan:false, animate:false }), 300);
 });
+
+
+// ── Live weather fetch (Open-Meteo, runs on app load) ────────────────────
+function fetchLiveWeather() {
+  const today = new Date().toISOString().slice(0,10);
+  const url = 'https://api.open-meteo.com/v1/forecast'
+    + '?latitude=24.883&longitude=121.087'
+    + '&hourly=temperature_2m,apparent_temperature,weathercode,windspeed_10m,winddirection_10m,precipitation_probability'
+    + '&timezone=Asia%2FTaipei'
+    + '&start_date=' + today + '&end_date=' + today;
+
+  fetch(url)
+    .then(r => r.json())
+    .then(d => {
+      const times = d.hourly.time;
+      // Target 12:00 on the stored date; fallback to current hour
+      const target = today === '2026-05-22' ? today + 'T12:00' : today + 'T12:00';
+      let idx = times.indexOf(target);
+      if (idx === -1) {
+        // Use current hour
+        const hh = new Date().getHours().toString().padStart(2,'0');
+        idx = times.indexOf(today + 'T' + hh + ':00');
+      }
+      if (idx === -1) idx = 12; // noon fallback index
+
+      const temp    = d.hourly.temperature_2m[idx];
+      const feels   = d.hourly.apparent_temperature[idx];
+      const code    = d.hourly.weathercode[idx];
+      const windKph = Math.round(d.hourly.windspeed_10m[idx]);
+      const windDeg = d.hourly.winddirection_10m[idx];
+      const precip  = d.hourly.precipitation_probability[idx];
+
+      const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+      const windDir = dirs[Math.round(windDeg/22.5)%16];
+
+      const wmoMap = {0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',
+        45:'Foggy',48:'Icy fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',
+        61:'Light rain',63:'Rain',65:'Heavy rain',80:'Light showers',81:'Showers',
+        95:'Thunderstorm'};
+      const desc  = wmoMap[code] || ('Code '+code);
+      const emoji = code<=1?'☀️':code<=2?'⛅':code<=3?'☁️':'🌧️';
+
+      const elDesc = document.getElementById('wx-desc');
+      const elTemp = document.getElementById('wx-temp');
+      const elRain = document.getElementById('wx-rain');
+      const elWind = document.getElementById('wx-wind');
+
+      if (elDesc) elDesc.innerHTML = emoji + ' <strong>' + desc + '</strong>';
+      if (elTemp) elTemp.innerHTML = '🌡️ <strong>' + temp + '°C</strong> <span style="color:#94a3b8">/ feels ' + feels + '°C</span>';
+      if (elRain) elRain.innerHTML = '💧 <strong>' + precip + '%</strong> rain chance';
+      if (elWind) elWind.innerHTML = '🌬️ <strong class="wind-badge">' + windKph + ' km/h ' + windDir + ' (' + windDeg + '°)</strong>';
+
+      console.log('[weather] Live update OK:', desc, temp+'°C', windKph+'km/h', windDir);
+    })
+    .catch(e => console.warn('[weather] Live fetch failed, using baked-in values:', e.message));
+}
+// Call on page load (no need to wait for auth — weather is non-sensitive)
+fetchLiveWeather();
+
 </script>
 </body>
 </html>
