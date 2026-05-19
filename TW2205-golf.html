@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>再興高爾夫球場 — 22 May 2026</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+/* ── Reset & Base ───────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh}
+
+/* ── Password Gate ──────────────────────────────────── */
+#gate{position:fixed;inset:0;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 60%,#0f172a 100%);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:30px}
+#gate h1{font-size:2em;color:#f0c040;text-align:center;letter-spacing:.04em}
+#gate .tagline{color:#94a3b8;font-size:1em;text-align:center}
+#gate input{padding:12px 20px;font-size:1.1em;border-radius:8px;border:2px solid #334155;background:#1e293b;color:#fff;width:260px;text-align:center}
+#gate input:focus{outline:none;border-color:#f0c040}
+#gate button{padding:12px 32px;background:#f0c040;color:#0f172a;border:none;border-radius:8px;font-size:1.05em;font-weight:700;cursor:pointer;transition:opacity .2s}
+#gate button:hover{opacity:.85}
+#gate .err{color:#f87171;font-size:.9em;display:none}
+#app{display:none}
+
+/* ── Tournament Header ─────────────────────────────── */
+#tourney-header{background:linear-gradient(90deg,#0f172a 0%,#1e3a5f 50%,#0f172a 100%);padding:20px 24px;border-bottom:2px solid #f0c040}
+.header-inner{max-width:1100px;margin:0 auto}
+.course-name-cn{font-size:1.6em;font-weight:700;color:#f0c040;letter-spacing:.06em}
+.course-name-en{font-size:1em;color:#94a3b8;margin-top:2px}
+.tourney-meta{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;align-items:center}
+.meta-pill{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:5px 14px;font-size:.85em;color:#cbd5e1}
+.meta-pill strong{color:#f0c040}
+.weather-block{background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);border-radius:10px;padding:8px 16px;font-size:.88em;color:#e2e8f0;margin-top:8px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.wx-item strong{color:#f0c040}
+.wind-badge{background:#1e3a5f;border-radius:6px;padding:3px 10px;font-weight:600;color:#7dd3fc}
+
+/* ── Sticky Nav ────────────────────────────────────── */
+#hole-nav{position:sticky;top:0;z-index:100;background:#0f172a;border-bottom:1px solid #1e3a5f;overflow-x:auto;white-space:nowrap;padding:0 8px;display:flex;align-items:stretch}
+.nav-item{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 10px;text-decoration:none;color:#94a3b8;font-size:.82em;font-weight:600;border-bottom:3px solid transparent;transition:all .2s;cursor:pointer;min-width:42px}
+.nav-item:hover{color:#f0c040}
+.nav-item.active{color:#f0c040;border-bottom-color:#f0c040}
+.nav-par{font-size:.68em;color:#4b5563;font-weight:400}
+.nav-item.active .nav-par,.nav-item:hover .nav-par{color:#b45309}
+
+/* ── Scorecard Table ───────────────────────────────── */
+#scorecard-section{max-width:1100px;margin:28px auto;padding:0 16px}
+.sc-title{font-size:1.15em;font-weight:700;color:#f0c040;margin-bottom:12px;letter-spacing:.04em}
+.sc-table{width:100%;border-collapse:collapse;font-size:.88em}
+.sc-table th{background:#1e3a5f;color:#93c5fd;padding:7px 10px;text-align:center;font-weight:600}
+.sc-table td{padding:6px 10px;text-align:center;border-bottom:1px solid #1e293b}
+.sc-table .hnum{font-weight:700;color:#e2e8f0}
+.sc-table .hcp{color:#6b7280}
+.sc-table .blue{color:#60a5fa;font-weight:600}
+.sc-table .white{color:#d1d5db}
+.sc-table .red{color:#f87171}
+.sc-table .par3 td{background:rgba(99,102,241,.06)}
+.sc-table .par5 td{background:rgba(16,185,129,.06)}
+.sc-table .total-row td{background:#1e293b;font-size:.92em}
+.sc-table .grand td{background:#1e3a5f;font-size:.95em}
+
+/* ── Hole Section ──────────────────────────────────── */
+.hole-section{max-width:1100px;margin:32px auto;padding:0 16px}
+.hole-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #1e3a5f}
+.hole-title-block{display:flex;align-items:center;gap:10px}
+.hole-number{font-size:2em;font-weight:800;color:#f0c040;letter-spacing:.02em}
+.hole-par{border-radius:6px;padding:4px 12px;font-size:.85em;font-weight:700}
+.badge-par3{background:#312e81;color:#a5b4fc}
+.badge-par4{background:#1e3a5f;color:#7dd3fc}
+.badge-par5{background:#064e3b;color:#6ee7b7}
+.hole-hcp{font-size:.82em;color:#6b7280;background:#1e293b;border-radius:6px;padding:4px 10px}
+.hole-distances{display:flex;gap:10px;font-size:.9em;font-weight:600}
+.dist-blue{color:#60a5fa}
+.dist-white{color:#d1d5db}
+.dist-red{color:#f87171}
+
+/* ── Hole Body ─────────────────────────────────────── */
+.hole-body{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:720px){.hole-body{grid-template-columns:1fr}}
+.map-container{border-radius:10px;overflow:hidden;border:2px solid #1e3a5f;box-shadow:0 4px 20px rgba(0,0,0,.5)}
+.leaflet-map{height:420px;width:100%}
+.map-tip{background:#0f172a!important;color:#f0c040!important;border:1px solid #f0c040!important;border-radius:4px;font-size:.8em;font-weight:600;padding:2px 6px}
+
+/* ── Caddie Panel ──────────────────────────────────── */
+.caddie-panel{display:flex;flex-direction:column;gap:12px}
+.caddie-course-note{background:#1e293b;border-left:4px solid #f0c040;border-radius:0 8px 8px 0;padding:12px 14px;font-size:.88em;color:#cbd5e1;line-height:1.6}
+.shot-plan-title{font-size:.9em;font-weight:700;color:#7dd3fc;text-transform:uppercase;letter-spacing:.06em}
+.shot-row{display:grid;grid-template-columns:56px 90px 1fr;gap:8px;align-items:start;padding:8px 10px;background:#1e293b;border-radius:8px;font-size:.85em}
+.shot-num{color:#94a3b8;font-weight:600;padding-top:2px}
+.club-badge{border-radius:5px;padding:2px 8px;font-weight:700;font-size:.82em;text-align:center;white-space:nowrap}
+.badge-driver{background:#7c3aed;color:#e9d5ff}
+.badge-wood{background:#0369a1;color:#bae6fd}
+.badge-iron{background:#065f46;color:#6ee7b7}
+.badge-wedge{background:#92400e;color:#fde68a}
+.shot-note{color:#d1d5db;line-height:1.5}
+.wind-note{background:#1e3a5f;border-radius:8px;padding:10px 13px;font-size:.83em;color:#7dd3fc;border-left:3px solid #3b82f6}
+
+/* ── Hole Nav Buttons ──────────────────────────────── */
+.hole-nav-btns{display:flex;justify-content:space-between;margin-top:18px;padding-top:14px;border-top:1px solid #1e293b}
+.nav-btn{background:#1e3a5f;color:#93c5fd;border:1px solid #2563eb;border-radius:8px;padding:9px 20px;cursor:pointer;font-size:.9em;font-weight:600;transition:background .2s}
+.nav-btn:hover{background:#2563eb;color:#fff}
+
+/* ── Print ─────────────────────────────────────────── */
+@media print{
+  body{background:#fff;color:#000}
+  #gate,#hole-nav,#scorecard-section,#tourney-header{display:none!important}
+  #app{display:block!important}
+  .hole-section{page-break-before:always;max-width:100%;padding:10px;margin:0}
+  .hole-section:first-child{page-break-before:auto}
+  .leaflet-map{height:380px}
+  .map-container{border:1px solid #999}
+  .caddie-panel{color:#000}
+  .caddie-course-note,.shot-row,.wind-note{background:#f5f5f5;color:#000;border-color:#999}
+  .hole-number,.hole-par{color:#000!important;background:#eee!important}
+  .shot-num,.shot-note,.club-badge{color:#000!important;background:#ddd!important}
+  .hole-nav-btns{display:none}
+  @page{size:A4 portrait;margin:12mm}
+}
+</style>
+</head>
+<body>
+
+<!-- ── PASSWORD GATE ──────────────────────────── -->
+<div id="gate">
+  <div style="font-size:3em;margin-bottom:4px">⛳</div>
+  <h1>再興高爾夫球場<br><span style="font-size:.6em;color:#7dd3fc">Tsai Hsing Elite Club</span></h1>
+  <div class="tagline">Made for fun · 22 May 2026 only 🍺</div>
+  <input type="password" id="pw-input" placeholder="Enter password" onkeydown="if(event.key==='Enter')checkPw()">
+  <button onclick="checkPw()">Enter 🏌️</button>
+  <div class="err" id="pw-err">❌ Wrong password — ask Jack for a beer hint</div>
+</div>
+
+<!-- ── MAIN APP ────────────────────────────────── -->
+<div id="app">
+
+<!-- Tournament Header -->
+<div id="tourney-header">
+  <div class="header-inner">
+    <div class="course-name-cn">再興高爾夫球場</div>
+    <div class="course-name-en">Tsai Hsing Elite Club · Hukou, Hsinchu, Taiwan</div>
+    <div class="tourney-meta">
+      <span class="meta-pill">📅 <strong>Friday 22 May 2026</strong></span>
+      <span class="meta-pill">🕛 <strong>12:10</strong> Tee Off</span>
+      <span class="meta-pill">⛳ Par <strong>72</strong></span>
+      <span class="meta-pill">🔵 Blue Tees · <strong>7,380y</strong></span>
+    </div>
+    <div class="weather-block">
+      <div class="wx-item">☀️ <strong>Mainly clear</strong></div>
+      <div class="wx-item">🌡️ <strong>28.5°C</strong> <span style="color:#6b7280">/ feels 33.9°C</span></div>
+      <div class="wx-item">💧 <strong>21%</strong> rain</div>
+      <div class="wx-item">🌬️ <strong class="wind-badge">24 km/h WSW (244°)</strong> — WSW strait wind, factor ~1 club into/downwind</div>
+    </div>
+  </div>
+</div>
+
+<!-- Sticky Nav -->
+<div id="hole-nav"><a href="#hole1" class="nav-item" data-h="1" onclick="setActiveNav(1)">H1<span class="nav-par">4</span></a><a href="#hole2" class="nav-item" data-h="2" onclick="setActiveNav(2)">H2<span class="nav-par">4</span></a><a href="#hole3" class="nav-item" data-h="3" onclick="setActiveNav(3)">H3<span class="nav-par">3</span></a><a href="#hole4" class="nav-item" data-h="4" onclick="setActiveNav(4)">H4<span class="nav-par">5</span></a><a href="#hole5" class="nav-item" data-h="5" onclick="setActiveNav(5)">H5<span class="nav-par">5</span></a><a href="#hole6" class="nav-item" data-h="6" onclick="setActiveNav(6)">H6<span class="nav-par">4</span></a><a href="#hole7" class="nav-item" data-h="7" onclick="setActiveNav(7)">H7<span class="nav-par">3</span></a><a href="#hole8" class="nav-item" data-h="8" onclick="setActiveNav(8)">H8<span class="nav-par">5</span></a><a href="#hole9" class="nav-item" data-h="9" onclick="setActiveNav(9)">H9<span class="nav-par">3</span></a><a href="#hole10" class="nav-item" data-h="10" onclick="setActiveNav(10)">H10<span class="nav-par">4</span></a><a href="#hole11" class="nav-item" data-h="11" onclick="setActiveNav(11)">H11<span class="nav-par">5</span></a><a href="#hole12" class="nav-item" data-h="12" onclick="setActiveNav(12)">H12<span class="nav-par">4</span></a><a href="#hole13" class="nav-item" data-h="13" onclick="setActiveNav(13)">H13<span class="nav-par">3</span></a><a href="#hole14" class="nav-item" data-h="14" onclick="setActiveNav(14)">H14<span class="nav-par">4</span></a><a href="#hole15" class="nav-item" data-h="15" onclick="setActiveNav(15)">H15<span class="nav-par">4</span></a><a href="#hole16" class="nav-item" data-h="16" onclick="setActiveNav(16)">H16<span class="nav-par">3</span></a><a href="#hole17" class="nav-item" data-h="17" onclick="setActiveNav(17)">H17<span class="nav-par">5</span></a><a href="#hole18" class="nav-item" data-h="18" onclick="setActiveNav(18)">H18<span class="nav-par">4</span></a></div>
+
+<!-- Scorecard -->
+<div id="scorecard-section">
+  <div class="sc-title">📊 Full Scorecard — Blue / White / Red Tees</div>
+  <table class="sc-table">
+    <thead>
+      <tr><th>H</th><th>Par</th><th>HCP</th><th class="blue">Blue</th><th class="white">White</th><th class="red">Red</th></tr>
+    </thead>
+    <tbody>
+      <tr class="par4">
+      <td class="hnum">1</td>
+      <td>4</td>
+      <td class="hcp">8</td>
+      <td class="blue">445</td>
+      <td class="white">385</td>
+      <td class="red">330</td>
+    </tr><tr class="par4">
+      <td class="hnum">2</td>
+      <td>4</td>
+      <td class="hcp">1</td>
+      <td class="blue">454</td>
+      <td class="white">410</td>
+      <td class="red">355</td>
+    </tr><tr class="par3">
+      <td class="hnum">3</td>
+      <td>3</td>
+      <td class="hcp">3</td>
+      <td class="blue">256</td>
+      <td class="white">220</td>
+      <td class="red">185</td>
+    </tr><tr class="par5">
+      <td class="hnum">4</td>
+      <td>5</td>
+      <td class="hcp">14</td>
+      <td class="blue">564</td>
+      <td class="white">520</td>
+      <td class="red">460</td>
+    </tr><tr class="par5">
+      <td class="hnum">5</td>
+      <td>5</td>
+      <td class="hcp">15</td>
+      <td class="blue">557</td>
+      <td class="white">510</td>
+      <td class="red">455</td>
+    </tr><tr class="par4">
+      <td class="hnum">6</td>
+      <td>4</td>
+      <td class="hcp">16</td>
+      <td class="blue">390</td>
+      <td class="white">355</td>
+      <td class="red">305</td>
+    </tr><tr class="par3">
+      <td class="hnum">7</td>
+      <td>3</td>
+      <td class="hcp">11</td>
+      <td class="blue">188</td>
+      <td class="white">165</td>
+      <td class="red">140</td>
+    </tr><tr class="par5">
+      <td class="hnum">8</td>
+      <td>5</td>
+      <td class="hcp">18</td>
+      <td class="blue">582</td>
+      <td class="white">535</td>
+      <td class="red">475</td>
+    </tr><tr class="par3">
+      <td class="hnum">9</td>
+      <td>3</td>
+      <td class="hcp">9</td>
+      <td class="blue">182</td>
+      <td class="white">158</td>
+      <td class="red">132</td>
+    </tr>
+      <tr class="total-row ">
+    <td colspan="2"><strong>OUT (1-9)</strong></td>
+    <td></td>
+    <td class="blue"><strong>3618</strong></td>
+    <td class="white"><strong>3258</strong></td>
+    <td class="red"><strong>2837</strong></td>
+  </tr>
+      <tr class="par4">
+      <td class="hnum">10</td>
+      <td>4</td>
+      <td class="hcp">10</td>
+      <td class="blue">393</td>
+      <td class="white">358</td>
+      <td class="red">308</td>
+    </tr><tr class="par5">
+      <td class="hnum">11</td>
+      <td>5</td>
+      <td class="hcp">5</td>
+      <td class="blue">643</td>
+      <td class="white">590</td>
+      <td class="red">520</td>
+    </tr><tr class="par4">
+      <td class="hnum">12</td>
+      <td>4</td>
+      <td class="hcp">2</td>
+      <td class="blue">384</td>
+      <td class="white">350</td>
+      <td class="red">300</td>
+    </tr><tr class="par3">
+      <td class="hnum">13</td>
+      <td>3</td>
+      <td class="hcp">6</td>
+      <td class="blue">201</td>
+      <td class="white">175</td>
+      <td class="red">148</td>
+    </tr><tr class="par4">
+      <td class="hnum">14</td>
+      <td>4</td>
+      <td class="hcp">7</td>
+      <td class="blue">437</td>
+      <td class="white">400</td>
+      <td class="red">348</td>
+    </tr><tr class="par4">
+      <td class="hnum">15</td>
+      <td>4</td>
+      <td class="hcp">13</td>
+      <td class="blue">435</td>
+      <td class="white">398</td>
+      <td class="red">345</td>
+    </tr><tr class="par3">
+      <td class="hnum">16</td>
+      <td>3</td>
+      <td class="hcp">12</td>
+      <td class="blue">203</td>
+      <td class="white">178</td>
+      <td class="red">150</td>
+    </tr><tr class="par5">
+      <td class="hnum">17</td>
+      <td>5</td>
+      <td class="hcp">17</td>
+      <td class="blue">567</td>
+      <td class="white">520</td>
+      <td class="red">460</td>
+    </tr><tr class="par4">
+      <td class="hnum">18</td>
+      <td>4</td>
+      <td class="hcp">4</td>
+      <td class="blue">499</td>
+      <td class="white">455</td>
+      <td class="red">398</td>
+    </tr>
+      <tr class="total-row ">
+    <td colspan="2"><strong>IN (10-18)</strong></td>
+    <td></td>
+    <td class="blue"><strong>3762</strong></td>
+    <td class="white"><strong>3424</strong></td>
+    <td class="red"><strong>2977</strong></td>
+  </tr>
+      <tr class="total-row grand">
+    <td colspan="2"><strong>TOTAL</strong></td>
+    <td></td>
+    <td class="blue"><strong>7380</strong></td>
+    <td class="white"><strong>6682</strong></td>
+    <td class="red"><strong>5814</strong></td>
+  </tr>
+    </tbody>
+  </table>
+  <div style="margin-top:10px;font-size:.78em;color:#4b5563">Par 3 = indigo · Par 4 = default · Par 5 = green tint</div>
+</div>
+
+<!-- 18 Hole Sections -->
+
+  <section class="hole-section" id="hole1" data-hole="1">
+    <div class="hole-header">
+      <div class="hole-title-block">
+        <span class="hole-number">H1</span>
+        <span class="hole-par badge-par4">Par 4</span>
+        <span class="hole-hcp">HCP 8</span>
+      </div>
+      <div class="hole-distances">
+        <span class="dist-blue">445y</span>
+        <span class="dist-white">385y</span>
+        <span class="dist-red">330y</span>
+      </div>
+    </div>
+
+    <div class="hole-body">
+      <div class="map-container">
+        <div id="map1" class="leaflet-map"></div>
+      </div>
+      <div class="caddie-panel">
+        <div class="caddie-course-note">Open tee shot — ultra-wide fairway, no real miss. WSW wind from left-to-right. Aim left-centre. Large green: aim centre, give it room to roll.</div>
+        <div class="shot-plan-title">📋 Shot Plan (Blue 445y)</div>
+        <div class="shot-row">
+      <div class="shot-num">Shot 1</div>
+      <div class="club-badge badge-driver">Driver</div>
+      <div class="shot-note">Off tee. Ultra-wide fairway — aggressive line. 205y remaining.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 2</div>
+      <div class="club-badge badge-wood">5-Wood</div>
+      <div class="shot-note">Lay up. 205y to pin, carry 200y. ~5y remaining.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 3</div>
+      <div class="club-badge badge-iron">56°</div>
+      <div class="shot-note">Approach to large green. 5y. Aim centre — 56° at 70y.</div>
+    </div>
+        <div class="wind-note">🌬️ Wind 24 km/h from WSW (244°) — WSW/strait wind. Factor ~1 club into/downwind on exposed holes.</div>
+      </div>
+    </div>
+
+    <div class="hole-nav-btns">
+      <span></span>
+      <button class="nav-btn" onclick="goHole(2)">H2 →</button>
+    </div>
+  </section>
+  <section class="hole-section" id="hole2" data-hole="2">
+    <div class="hole-header">
+      <div class="hole-title-block">
+        <span class="hole-number">H2</span>
+        <span class="hole-par badge-par4">Par 4</span>
+        <span class="hole-hcp">HCP 1</span>
+      </div>
+      <div class="hole-distances">
+        <span class="dist-blue">454y</span>
+        <span class="dist-white">410y</span>
+        <span class="dist-red">355y</span>
+      </div>
+    </div>
+
+    <div class="hole-body">
+      <div class="map-container">
+        <div id="map2" class="leaflet-map"></div>
+      </div>
+      <div class="caddie-panel">
+        <div class="caddie-course-note">HCP 1 — hardest hole. Long par 4 at 454y. WSW wind likely helping slightly left-to-right. Drive hard, long approach required. Green is large but don't be short.</div>
+        <div class="shot-plan-title">📋 Shot Plan (Blue 454y)</div>
+        <div class="shot-row">
+      <div class="shot-num">Shot 1</div>
+      <div class="club-badge badge-driver">Driver</div>
+      <div class="shot-note">Off tee. Ultra-wide fairway — aggressive line. 214y remaining.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 2</div>
+      <div class="club-badge badge-wood">5-Wood</div>
+      <div class="shot-note">Lay up. 214y to pin, carry 200y. ~14y remaining.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 3</div>
+      <div class="club-badge badge-iron">56°</div>
+      <div class="shot-note">Approach to large green. 14y. Aim centre — 56° at 70y.</div>
+    </div>
+        <div class="wind-note">🌬️ Wind 24 km/h from WSW (244°) — WSW/strait wind. Factor ~1 club into/downwind on exposed holes.</div>
+      </div>
+    </div>
+
+    <div class="hole-nav-btns">
+      <button class="nav-btn" onclick="goHole(1)">← H1</button>
+      <button class="nav-btn" onclick="goHole(3)">H3 →</button>
+    </div>
+  </section>
+  <section class="hole-section" id="hole3" data-hole="3">
+    <div class="hole-header">
+      <div class="hole-title-block">
+        <span class="hole-number">H3</span>
+        <span class="hole-par badge-par3">Par 3</span>
+        <span class="hole-hcp">HCP 3</span>
+      </div>
+      <div class="hole-distances">
+        <span class="dist-blue">256y</span>
+        <span class="dist-white">220y</span>
+        <span class="dist-red">185y</span>
+      </div>
+    </div>
+
+    <div class="hole-body">
+      <div class="map-container">
+        <div id="map3" class="leaflet-map"></div>
+      </div>
+      <div class="caddie-panel">
+        <div class="caddie-course-note">Long par 3 at 256y — only hole exceeding 5-Wood range. WSW wind may be in your face. Play 5-Wood full, accept being 50y short, chip up. Don't chase the green in one.</div>
+        <div class="shot-plan-title">📋 Shot Plan (Blue 256y)</div>
+        <div class="shot-row">
+      <div class="shot-num">Shot 1</div>
+      <div class="club-badge badge-wood">5-Wood</div>
+      <div class="shot-note">Full swing. Will land ~56y short of green — play safe, aim left of any trouble.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 2</div>
+      <div class="club-badge badge-wedge">Chip/pitch</div>
+      <div class="shot-note">~56y pitch onto the green. Wind: add 1 club if into NW breeze.</div>
+    </div>
+        <div class="wind-note">🌬️ Wind 24 km/h from WSW (244°) — WSW/strait wind. Factor ~1 club into/downwind on exposed holes.</div>
+      </div>
+    </div>
+
+    <div class="hole-nav-btns">
+      <button class="nav-btn" onclick="goHole(2)">← H2</button>
+      <button class="nav-btn" onclick="goHole(4)">H4 →</button>
+    </div>
+  </section>
+  <section class="hole-section" id="hole4" data-hole="4">
+    <div class="hole-header">
+      <div class="hole-title-block">
+        <span class="hole-number">H4</span>
+        <span class="hole-par badge-par5">Par 5</span>
+        <span class="hole-hcp">HCP 14</span>
+      </div>
+      <div class="hole-distances">
+        <span class="dist-blue">564y</span>
+        <span class="dist-white">520y</span>
+        <span class="dist-red">460y</span>
+      </div>
+    </div>
+
+    <div class="hole-body">
+      <div class="map-container">
+        <div id="map4" class="leaflet-map"></div>
+      </div>
+      <div class="caddie-panel">
+        <div class="caddie-course-note">Long par 5, reachable in 3. WSW crosswind. Wide fairway — driver then 5-Wood to lay up short of green zone. Easy birdie hole, don't overcook it.</div>
+        <div class="shot-plan-title">📋 Shot Plan (Blue 564y)</div>
+        <div class="shot-row">
+      <div class="shot-num">Shot 1</div>
+      <div class="club-badge badge-driver">Driver</div>
+      <div class="shot-note">Off tee. 564y hole — open layout, no need to steer.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 2</div>
+      <div class="club-badge badge-wood">5-Wood</div>
+      <div class="shot-note">2nd shot. 324y to pin — 5-Wood lays up or reaches fairway zone.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 3</div>
+      <div class="club-badge badge-iron">9-iron</div>
+      <div class="shot-note">Approach to giant green. 124y — 9-iron at 135y. Aim for centre of green.</div>
+    </div>
+        <div class="wind-note">🌬️ Wind 24 km/h from WSW (244°) — WSW/strait wind. Factor ~1 club into/downwind on exposed holes.</div>
+      </div>
+    </div>
+
+    <div class="hole-nav-btns">
+      <button class="nav-btn" onclick="goHole(3)">← H3</button>
+      <button class="nav-btn" onclick="goHole(5)">H5 →</button>
+    </div>
+  </section>
+  <section class="hole-section" id="hole5" data-hole="5">
+    <div class="hole-header">
+      <div class="hole-title-block">
+        <span class="hole-number">H5</span>
+        <span class="hole-par badge-par5">Par 5</span>
+        <span class="hole-hcp">HCP 15</span>
+      </div>
+      <div class="hole-distances">
+        <span class="dist-blue">557y</span>
+        <span class="dist-white">510y</span>
+        <span class="dist-red">455y</span>
+      </div>
+    </div>
+
+    <div class="hole-body">
+      <div class="map-container">
+        <div id="map5" class="leaflet-map"></div>
+      </div>
+      <div class="caddie-panel">
+        <div class="caddie-course-note">Par 5 almost identical length to H4. Wind typically side-on. Same plan: Driver + 5-Wood + approach. Super large green — aim middle, avoid back bunkers.</div>
+        <div class="shot-plan-title">📋 Shot Plan (Blue 557y)</div>
+        <div class="shot-row">
+      <div class="shot-num">Shot 1</div>
+      <div class="club-badge badge-driver">Driver</div>
+      <div class="shot-note">Off tee. 557y hole — open layout, no need to steer.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 2</div>
+      <div class="club-badge badge-wood">5-Wood</div>
+      <div class="shot-note">2nd shot. 317y to pin — 5-Wood lays up or reaches fairway zone.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 3</div>
+      <div class="club-badge badge-iron">W-iron</div>
+      <div class="shot-note">Approach to giant green. 117y — W-iron at 120y. Aim for centre of green.</div>
+    </div>
+        <div class="wind-note">🌬️ Wind 24 km/h from WSW (244°) — WSW/strait wind. Factor ~1 club into/downwind on exposed holes.</div>
+      </div>
+    </div>
+
+    <div class="hole-nav-btns">
+      <button class="nav-btn" onclick="goHole(4)">← H4</button>
+      <button class="nav-btn" onclick="goHole(6)">H6 →</button>
+    </div>
+  </section>
+  <section class="hole-section" id="hole6" data-hole="6">
+    <div class="hole-header">
+      <div class="hole-title-block">
+        <span class="hole-number">H6</span>
+        <span class="hole-par badge-par4">Par 4</span>
+        <span class="hole-hcp">HCP 16</span>
+      </div>
+      <div class="hole-distances">
+        <span class="dist-blue">390y</span>
+        <span class="dist-white">355y</span>
+        <span class="dist-red">305y</span>
+      </div>
+    </div>
+
+    <div class="hole-body">
+      <div class="map-container">
+        <div id="map6" class="leaflet-map"></div>
+      </div>
+      <div class="caddie-panel">
+        <div class="caddie-course-note">Shorter par 4 at 390y. WSW wind may help or cross depending on hole direction. Driver leaves a 150y approach — comfortable wedge territory.</div>
+        <div class="shot-plan-title">📋 Shot Plan (Blue 390y)</div>
+        <div class="shot-row">
+      <div class="shot-num">Shot 1</div>
+      <div class="club-badge badge-driver">Driver</div>
+      <div class="shot-note">Off tee. Ultra-wide fairway — aggressive line. 150y remaining.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 2</div>
+      <div class="club-badge badge-iron">7-iron</div>
+      <div class="shot-note">Approach. 150y to pin — 7-iron at 155y. Large greens, aim for centre.</div>
+    </div>
+        <div class="wind-note">🌬️ Wind 24 km/h from WSW (244°) — WSW/strait wind. Factor ~1 club into/downwind on exposed holes.</div>
+      </div>
+    </div>
+
+    <div class="hole-nav-btns">
+      <button class="nav-btn" onclick="goHole(5)">← H5</button>
+      <button class="nav-btn" onclick="goHole(7)">H7 →</button>
+    </div>
+  </section>
+  <section class="hole-section" id="hole7" data-hole="7">
+    <div class="hole-header">
+      <div class="hole-title-block">
+        <span class="hole-number">H7</span>
+        <span class="hole-par badge-par3">Par 3</span>
+        <span class="hole-hcp">HCP 11</span>
+      </div>
+      <div class="hole-distances">
+        <span class="dist-blue">188y</span>
+        <span class="dist-white">165y</span>
+        <span class="dist-red">140y</span>
+      </div>
+    </div>
+
+    <div class="hole-body">
+      <div class="map-container">
+        <div id="map7" class="leaflet-map"></div>
+      </div>
+      <div class="caddie-panel">
+        <div class="caddie-course-note">Short par 3 at 188y. Pick 5-Wood (200y) to guarantee carry. Large green. WSW wind: check direction at tee, may need to club up or play a cut.</div>
+        <div class="shot-plan-title">📋 Shot Plan (Blue 188y)</div>
+        <div class="shot-row">
+      <div class="shot-num">Shot 1</div>
+      <div class="club-badge badge-wood">5-Wood</div>
+      <div class="shot-note">188y to pin. Carry 200y. Large greens — aim centre, let it release.</div>
+    </div>
+        <div class="wind-note">🌬️ Wind 24 km/h from WSW (244°) — WSW/strait wind. Factor ~1 club into/downwind on exposed holes.</div>
+      </div>
+    </div>
+
+    <div class="hole-nav-btns">
+      <button class="nav-btn" onclick="goHole(6)">← H6</button>
+      <button class="nav-btn" onclick="goHole(8)">H8 →</button>
+    </div>
+  </section>
+  <section class="hole-section" id="hole8" data-hole="8">
+    <div class="hole-header">
+      <div class="hole-title-block">
+        <span class="hole-number">H8</span>
+        <span class="hole-par badge-par5">Par 5</span>
+        <span class="hole-hcp">HCP 18</span>
+      </div>
+      <div class="hole-distances">
+        <span class="dist-blue">582y</span>
+        <span class="dist-white">535y</span>
+        <span class="dist-red">475y</span>
+      </div>
+    </div>
+
+    <div class="hole-body">
+      <div class="map-container">
+        <div id="map8" class="leaflet-map"></div>
+      </div>
+      <div class="caddie-panel">
+        <div class="caddie-course-note">Easiest hole (HCP 18) despite being 582y par 5. Very wide fairway. Three easy full shots. Don't overthink — this is a birdie chance.</div>
+        <div class="shot-plan-title">📋 Shot Plan (Blue 582y)</div>
+        <div class="shot-row">
+      <div class="shot-num">Shot 1</div>
+      <div class="club-badge badge-driver">Driver</div>
+      <div class="shot-note">Off tee. 582y hole — open layout, no need to steer.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 2</div>
+      <div class="club-badge badge-wood">5-Wood</div>
+      <div class="shot-note">2nd shot. 342y to pin — 5-Wood lays up or reaches fairway zone.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 3</div>
+      <div class="club-badge badge-iron">8-iron</div>
+      <div class="shot-note">Approach to giant green. 142y — 8-iron at 145y. Aim for centre of green.</div>
+    </div>
+        <div class="wind-note">🌬️ Wind 24 km/h from WSW (244°) — WSW/strait wind. Factor ~1 club into/downwind on exposed holes.</div>
+      </div>
+    </div>
+
+    <div class="hole-nav-btns">
+      <button class="nav-btn" onclick="goHole(7)">← H7</button>
+      <button class="nav-btn" onclick="goHole(9)">H9 →</button>
+    </div>
+  </section>
+  <section class="hole-section" id="hole9" data-hole="9">
+    <div class="hole-header">
+      <div class="hole-title-block">
+        <span class="hole-number">H9</span>
+        <span class="hole-par badge-par3">Par 3</span>
+        <span class="hole-hcp">HCP 9</span>
+      </div>
+      <div class="hole-distances">
+        <span class="dist-blue">182y</span>
+        <span class="dist-white">158y</span>
+        <span class="dist-red">132y</span>
+      </div>
+    </div>
+
+    <div class="hole-body">
+      <div class="map-container">
+        <div id="map9" class="leaflet-map"></div>
+      </div>
+      <div class="caddie-panel">
+        <div class="caddie-course-note">Short par 3 at 182y. 7-iron (155y) falls short — use 6-iron (160y) or 5-iron (170y). WSW wind could take 1–2 clubs off. Aim centre of big green.</div>
+        <div class="shot-plan-title">📋 Shot Plan (Blue 182y)</div>
+        <div class="shot-row">
+      <div class="shot-num">Shot 1</div>
+      <div class="club-badge badge-wood">5-Wood</div>
+      <div class="shot-note">182y to pin. Carry 200y. Large greens — aim centre, let it release.</div>
+    </div>
+        <div class="wind-note">🌬️ Wind 24 km/h from WSW (244°) — WSW/strait wind. Factor ~1 club into/downwind on exposed holes.</div>
+      </div>
+    </div>
+
+    <div class="hole-nav-btns">
+      <button class="nav-btn" onclick="goHole(8)">← H8</button>
+      <button class="nav-btn" onclick="goHole(10)">H10 →</button>
+    </div>
+  </section>
+  <section class="hole-section" id="hole10" data-hole="10">
+    <div class="hole-header">
+      <div class="hole-title-block">
+        <span class="hole-number">H10</span>
+        <span class="hole-par badge-par4">Par 4</span>
+        <span class="hole-hcp">HCP 10</span>
+      </div>
+      <div class="hole-distances">
+        <span class="dist-blue">393y</span>
+        <span class="dist-white">358y</span>
+        <span class="dist-red">308y</span>
+      </div>
+    </div>
+
+    <div class="hole-body">
+      <div class="map-container">
+        <div id="map10" class="leaflet-map"></div>
+      </div>
+      <div class="caddie-panel">
+        <div class="caddie-course-note">Par 4, 393y. Opening back nine. WSW wind varies on this side. Driver + comfortable mid-iron. Settle into back nine rhythm here.</div>
+        <div class="shot-plan-title">📋 Shot Plan (Blue 393y)</div>
+        <div class="shot-row">
+      <div class="shot-num">Shot 1</div>
+      <div class="club-badge badge-driver">Driver</div>
+      <div class="shot-note">Off tee. Ultra-wide fairway — aggressive line. 153y remaining.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 2</div>
+      <div class="club-badge badge-iron">7-iron</div>
+      <div class="shot-note">Approach. 153y to pin — 7-iron at 155y. Large greens, aim for centre.</div>
+    </div>
+        <div class="wind-note">🌬️ Wind 24 km/h from WSW (244°) — WSW/strait wind. Factor ~1 club into/downwind on exposed holes.</div>
+      </div>
+    </div>
+
+    <div class="hole-nav-btns">
+      <button class="nav-btn" onclick="goHole(9)">← H9</button>
+      <button class="nav-btn" onclick="goHole(11)">H11 →</button>
+    </div>
+  </section>
+  <section class="hole-section" id="hole11" data-hole="11">
+    <div class="hole-header">
+      <div class="hole-title-block">
+        <span class="hole-number">H11</span>
+        <span class="hole-par badge-par5">Par 5</span>
+        <span class="hole-hcp">HCP 5</span>
+      </div>
+      <div class="hole-distances">
+        <span class="dist-blue">643y</span>
+        <span class="dist-white">590y</span>
+        <span class="dist-red">520y</span>
+      </div>
+    </div>
+
+    <div class="hole-body">
+      <div class="map-container">
+        <div id="map11" class="leaflet-map"></div>
+      </div>
+      <div class="caddie-panel">
+        <div class="caddie-course-note">Monster par 5 at 643y — longest hole, LARGEST green in Taiwan. Three full shots minimum: Driver → 5-Wood → 5-Wood → approach. Don't try to reach in two. Embrace the length. Wind management critical.</div>
+        <div class="shot-plan-title">📋 Shot Plan (Blue 643y)</div>
+        <div class="shot-row">
+      <div class="shot-num">Shot 1</div>
+      <div class="club-badge badge-driver">Driver</div>
+      <div class="shot-note">Off tee. 643y hole — open layout, no need to steer.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 2</div>
+      <div class="club-badge badge-wood">5-Wood</div>
+      <div class="shot-note">2nd shot. 403y to pin — 5-Wood lays up or reaches fairway zone.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 3</div>
+      <div class="club-badge badge-wood">5-Wood</div>
+      <div class="shot-note">3rd shot lay-up. 203y remaining — another 5-Wood.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 4</div>
+      <div class="club-badge badge-iron">56°</div>
+      <div class="shot-note">Approach. 3y to super-large green — 56° at 70y.</div>
+    </div>
+        <div class="wind-note">🌬️ Wind 24 km/h from WSW (244°) — WSW/strait wind. Factor ~1 club into/downwind on exposed holes.</div>
+      </div>
+    </div>
+
+    <div class="hole-nav-btns">
+      <button class="nav-btn" onclick="goHole(10)">← H10</button>
+      <button class="nav-btn" onclick="goHole(12)">H12 →</button>
+    </div>
+  </section>
+  <section class="hole-section" id="hole12" data-hole="12">
+    <div class="hole-header">
+      <div class="hole-title-block">
+        <span class="hole-number">H12</span>
+        <span class="hole-par badge-par4">Par 4</span>
+        <span class="hole-hcp">HCP 2</span>
+      </div>
+      <div class="hole-distances">
+        <span class="dist-blue">384y</span>
+        <span class="dist-white">350y</span>
+        <span class="dist-red">300y</span>
+      </div>
+    </div>
+
+    <div class="hole-body">
+      <div class="map-container">
+        <div id="map12" class="leaflet-map"></div>
+      </div>
+      <div class="caddie-panel">
+        <div class="caddie-course-note">HCP 2 — second hardest. 384y par 4 but tight. Drive to fairway, then crisp approach to large green. Don't leak right in WSW wind.</div>
+        <div class="shot-plan-title">📋 Shot Plan (Blue 384y)</div>
+        <div class="shot-row">
+      <div class="shot-num">Shot 1</div>
+      <div class="club-badge badge-driver">Driver</div>
+      <div class="shot-note">Off tee. Ultra-wide fairway — aggressive line. 144y remaining.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 2</div>
+      <div class="club-badge badge-iron">8-iron</div>
+      <div class="shot-note">Approach. 144y to pin — 8-iron at 145y. Large greens, aim for centre.</div>
+    </div>
+        <div class="wind-note">🌬️ Wind 24 km/h from WSW (244°) — WSW/strait wind. Factor ~1 club into/downwind on exposed holes.</div>
+      </div>
+    </div>
+
+    <div class="hole-nav-btns">
+      <button class="nav-btn" onclick="goHole(11)">← H11</button>
+      <button class="nav-btn" onclick="goHole(13)">H13 →</button>
+    </div>
+  </section>
+  <section class="hole-section" id="hole13" data-hole="13">
+    <div class="hole-header">
+      <div class="hole-title-block">
+        <span class="hole-number">H13</span>
+        <span class="hole-par badge-par3">Par 3</span>
+        <span class="hole-hcp">HCP 6</span>
+      </div>
+      <div class="hole-distances">
+        <span class="dist-blue">201y</span>
+        <span class="dist-white">175y</span>
+        <span class="dist-red">148y</span>
+      </div>
+    </div>
+
+    <div class="hole-body">
+      <div class="map-container">
+        <div id="map13" class="leaflet-map"></div>
+      </div>
+      <div class="caddie-panel">
+        <div class="caddie-course-note">Par 3 at 201y. 5-iron (170y) is short — use 4-iron (180y) or 5-Wood (200y). WSW crosswind: take extra club and play safe to centre of large green.</div>
+        <div class="shot-plan-title">📋 Shot Plan (Blue 201y)</div>
+        <div class="shot-row">
+      <div class="shot-num">Shot 1</div>
+      <div class="club-badge badge-wood">5-Wood</div>
+      <div class="shot-note">Full swing. Will land ~1y short of green — play safe, aim left of any trouble.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 2</div>
+      <div class="club-badge badge-wedge">Chip/pitch</div>
+      <div class="shot-note">~1y pitch onto the green. Wind: add 1 club if into NW breeze.</div>
+    </div>
+        <div class="wind-note">🌬️ Wind 24 km/h from WSW (244°) — WSW/strait wind. Factor ~1 club into/downwind on exposed holes.</div>
+      </div>
+    </div>
+
+    <div class="hole-nav-btns">
+      <button class="nav-btn" onclick="goHole(12)">← H12</button>
+      <button class="nav-btn" onclick="goHole(14)">H14 →</button>
+    </div>
+  </section>
+  <section class="hole-section" id="hole14" data-hole="14">
+    <div class="hole-header">
+      <div class="hole-title-block">
+        <span class="hole-number">H14</span>
+        <span class="hole-par badge-par4">Par 4</span>
+        <span class="hole-hcp">HCP 7</span>
+      </div>
+      <div class="hole-distances">
+        <span class="dist-blue">437y</span>
+        <span class="dist-white">400y</span>
+        <span class="dist-red">348y</span>
+      </div>
+    </div>
+
+    <div class="hole-body">
+      <div class="map-container">
+        <div id="map14" class="leaflet-map"></div>
+      </div>
+      <div class="caddie-panel">
+        <div class="caddie-course-note">437y par 4. Driver then 197y remaining — 4-iron (180y) gets close, leave a short chip. Exposed hole — check wind at address.</div>
+        <div class="shot-plan-title">📋 Shot Plan (Blue 437y)</div>
+        <div class="shot-row">
+      <div class="shot-num">Shot 1</div>
+      <div class="club-badge badge-driver">Driver</div>
+      <div class="shot-note">Off tee. Ultra-wide fairway — aggressive line. 197y remaining.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 2</div>
+      <div class="club-badge badge-wood">5-Wood</div>
+      <div class="shot-note">Approach. 197y to pin — 5-Wood at 200y. Large greens, aim for centre.</div>
+    </div>
+        <div class="wind-note">🌬️ Wind 24 km/h from WSW (244°) — WSW/strait wind. Factor ~1 club into/downwind on exposed holes.</div>
+      </div>
+    </div>
+
+    <div class="hole-nav-btns">
+      <button class="nav-btn" onclick="goHole(13)">← H13</button>
+      <button class="nav-btn" onclick="goHole(15)">H15 →</button>
+    </div>
+  </section>
+  <section class="hole-section" id="hole15" data-hole="15">
+    <div class="hole-header">
+      <div class="hole-title-block">
+        <span class="hole-number">H15</span>
+        <span class="hole-par badge-par4">Par 4</span>
+        <span class="hole-hcp">HCP 13</span>
+      </div>
+      <div class="hole-distances">
+        <span class="dist-blue">435y</span>
+        <span class="dist-white">398y</span>
+        <span class="dist-red">345y</span>
+      </div>
+    </div>
+
+    <div class="hole-body">
+      <div class="map-container">
+        <div id="map15" class="leaflet-map"></div>
+      </div>
+      <div class="caddie-panel">
+        <div class="caddie-course-note">435y par 4 — similar to H14. Driver + 4-iron or 5-iron approach. Open layout, WSW wind likely off your left shoulder, aim slightly right.</div>
+        <div class="shot-plan-title">📋 Shot Plan (Blue 435y)</div>
+        <div class="shot-row">
+      <div class="shot-num">Shot 1</div>
+      <div class="club-badge badge-driver">Driver</div>
+      <div class="shot-note">Off tee. Ultra-wide fairway — aggressive line. 195y remaining.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 2</div>
+      <div class="club-badge badge-wood">5-Wood</div>
+      <div class="shot-note">Approach. 195y to pin — 5-Wood at 200y. Large greens, aim for centre.</div>
+    </div>
+        <div class="wind-note">🌬️ Wind 24 km/h from WSW (244°) — WSW/strait wind. Factor ~1 club into/downwind on exposed holes.</div>
+      </div>
+    </div>
+
+    <div class="hole-nav-btns">
+      <button class="nav-btn" onclick="goHole(14)">← H14</button>
+      <button class="nav-btn" onclick="goHole(16)">H16 →</button>
+    </div>
+  </section>
+  <section class="hole-section" id="hole16" data-hole="16">
+    <div class="hole-header">
+      <div class="hole-title-block">
+        <span class="hole-number">H16</span>
+        <span class="hole-par badge-par3">Par 3</span>
+        <span class="hole-hcp">HCP 12</span>
+      </div>
+      <div class="hole-distances">
+        <span class="dist-blue">203y</span>
+        <span class="dist-white">178y</span>
+        <span class="dist-red">150y</span>
+      </div>
+    </div>
+
+    <div class="hole-body">
+      <div class="map-container">
+        <div id="map16" class="leaflet-map"></div>
+      </div>
+      <div class="caddie-panel">
+        <div class="caddie-course-note">Par 3 at 203y. Similar to H13. 4-iron (180y) or 5-Wood (200y). There's a pond/water feature — DO NOT be short. Take the extra club, land on the green.</div>
+        <div class="shot-plan-title">📋 Shot Plan (Blue 203y)</div>
+        <div class="shot-row">
+      <div class="shot-num">Shot 1</div>
+      <div class="club-badge badge-wood">5-Wood</div>
+      <div class="shot-note">Full swing. Will land ~3y short of green — play safe, aim left of any trouble.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 2</div>
+      <div class="club-badge badge-wedge">Chip/pitch</div>
+      <div class="shot-note">~3y pitch onto the green. Wind: add 1 club if into NW breeze.</div>
+    </div>
+        <div class="wind-note">🌬️ Wind 24 km/h from WSW (244°) — WSW/strait wind. Factor ~1 club into/downwind on exposed holes.</div>
+      </div>
+    </div>
+
+    <div class="hole-nav-btns">
+      <button class="nav-btn" onclick="goHole(15)">← H15</button>
+      <button class="nav-btn" onclick="goHole(17)">H17 →</button>
+    </div>
+  </section>
+  <section class="hole-section" id="hole17" data-hole="17">
+    <div class="hole-header">
+      <div class="hole-title-block">
+        <span class="hole-number">H17</span>
+        <span class="hole-par badge-par5">Par 5</span>
+        <span class="hole-hcp">HCP 17</span>
+      </div>
+      <div class="hole-distances">
+        <span class="dist-blue">567y</span>
+        <span class="dist-white">520y</span>
+        <span class="dist-red">460y</span>
+      </div>
+    </div>
+
+    <div class="hole-body">
+      <div class="map-container">
+        <div id="map17" class="leaflet-map"></div>
+      </div>
+      <div class="caddie-panel">
+        <div class="caddie-course-note">Par 5 at 567y, HCP 17 so relatively easy. Driver + 5-Wood + short approach. Open and wide. Good birdie chance before the tough finisher.</div>
+        <div class="shot-plan-title">📋 Shot Plan (Blue 567y)</div>
+        <div class="shot-row">
+      <div class="shot-num">Shot 1</div>
+      <div class="club-badge badge-driver">Driver</div>
+      <div class="shot-note">Off tee. 567y hole — open layout, no need to steer.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 2</div>
+      <div class="club-badge badge-wood">5-Wood</div>
+      <div class="shot-note">2nd shot. 327y to pin — 5-Wood lays up or reaches fairway zone.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 3</div>
+      <div class="club-badge badge-iron">9-iron</div>
+      <div class="shot-note">Approach to giant green. 127y — 9-iron at 135y. Aim for centre of green.</div>
+    </div>
+        <div class="wind-note">🌬️ Wind 24 km/h from WSW (244°) — WSW/strait wind. Factor ~1 club into/downwind on exposed holes.</div>
+      </div>
+    </div>
+
+    <div class="hole-nav-btns">
+      <button class="nav-btn" onclick="goHole(16)">← H16</button>
+      <button class="nav-btn" onclick="goHole(18)">H18 →</button>
+    </div>
+  </section>
+  <section class="hole-section" id="hole18" data-hole="18">
+    <div class="hole-header">
+      <div class="hole-title-block">
+        <span class="hole-number">H18</span>
+        <span class="hole-par badge-par4">Par 4</span>
+        <span class="hole-hcp">HCP 4</span>
+      </div>
+      <div class="hole-distances">
+        <span class="dist-blue">499y</span>
+        <span class="dist-white">455y</span>
+        <span class="dist-red">398y</span>
+      </div>
+    </div>
+
+    <div class="hole-body">
+      <div class="map-container">
+        <div id="map18" class="leaflet-map"></div>
+      </div>
+      <div class="caddie-panel">
+        <div class="caddie-course-note">499y par 4 — long finisher. HCP 4. Driver then ~259y remaining — need 5-Wood (200y) lay-up, leaving ~60y. 56° wedge (70y) from there. Don't blow up on the last hole!</div>
+        <div class="shot-plan-title">📋 Shot Plan (Blue 499y)</div>
+        <div class="shot-row">
+      <div class="shot-num">Shot 1</div>
+      <div class="club-badge badge-driver">Driver</div>
+      <div class="shot-note">Off tee. Ultra-wide fairway — aggressive line. 259y remaining.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 2</div>
+      <div class="club-badge badge-wood">5-Wood</div>
+      <div class="shot-note">Lay up. 259y to pin, carry 200y. ~59y remaining.</div>
+    </div><div class="shot-row">
+      <div class="shot-num">Shot 3</div>
+      <div class="club-badge badge-iron">56°</div>
+      <div class="shot-note">Approach to large green. 59y. Aim centre — 56° at 70y.</div>
+    </div>
+        <div class="wind-note">🌬️ Wind 24 km/h from WSW (244°) — WSW/strait wind. Factor ~1 club into/downwind on exposed holes.</div>
+      </div>
+    </div>
+
+    <div class="hole-nav-btns">
+      <button class="nav-btn" onclick="goHole(17)">← H17</button>
+      <span></span>
+    </div>
+  </section>
+
+</div><!-- /#app -->
+
+<script>
+// ── Password gate ──────────────────────────────────────
+function checkPw(){
+  const v = document.getElementById('pw-input').value.trim();
+  if(v === 'buyjackabeer'){
+    sessionStorage.setItem('tsg_auth','1');
+    document.getElementById('gate').style.display='none';
+    document.getElementById('app').style.display='block';
+    initMaps();
+  } else {
+    document.getElementById('pw-err').style.display='block';
+    document.getElementById('pw-input').value='';
+    document.getElementById('pw-input').focus();
+  }
+}
+// Auto-login if already authenticated this session
+if(sessionStorage.getItem('tsg_auth')==='1'){
+  document.getElementById('gate').style.display='none';
+  document.getElementById('app').style.display='block';
+}
+
+// ── Hole navigation ────────────────────────────────────
+function goHole(h){
+  const el = document.getElementById('hole'+h);
+  if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+  setActiveNav(h);
+}
+function setActiveNav(h){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const a = document.querySelector('[data-h="'+h+'"]');
+  if(a){ a.classList.add('active'); a.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'}); }
+}
+// Intersection Observer to highlight active nav on scroll
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting) setActiveNav(parseInt(e.target.dataset.hole)); });
+},{threshold:0.3,rootMargin:'-80px 0px -60% 0px'});
+document.querySelectorAll('.hole-section').forEach(s=>observer.observe(s));
+
+// ── Map initialisation (called after gate is passed) ───
+let mapsInitialised = false;
+function initMaps(){
+  if(mapsInitialised) return;
+  mapsInitialised = true;
+  
+  (function(){
+    const pts = [[24.88214213845446,121.08811382771455],[24.8816768024731,121.09050366826158],[24.88117948342422,121.09161095200875]];
+    const map = L.map('map1', {zoomControl:true, attributionControl:false, scrollWheelZoom:false});
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(map);
+    L.polyline(pts,{color:'white',weight:3,opacity:.9}).addTo(map);
+    L.circleMarker(pts[0],{radius:8,color:'#FF6B35',fillColor:'#FF6B35',fillOpacity:.95,weight:2}).bindTooltip('Tee',{permanent:true,direction:'right',className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[1],{radius:6,color:'#FFD700',fillColor:'#FFD700',fillOpacity:.85,weight:2}).bindTooltip('Fwy',{permanent:false,className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[pts.length-1],{radius:8,color:'#4CAF50',fillColor:'#4CAF50',fillOpacity:.95,weight:2}).bindTooltip('Green',{permanent:true,direction:'left',className:'map-tip'}).addTo(map);
+    const fg=L.featureGroup(pts.map(p=>L.marker(p)));
+    map.fitBounds(fg.getBounds().pad(0.42));
+    window._maps = window._maps || {}; window._maps[1] = map;
+  })();
+
+  (function(){
+    const pts = [[24.88158646502813,121.09186441307544],[24.88075672589702,121.09412685638837],[24.88070834044259,121.0954420113344]];
+    const map = L.map('map2', {zoomControl:true, attributionControl:false, scrollWheelZoom:false});
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(map);
+    L.polyline(pts,{color:'white',weight:3,opacity:.9}).addTo(map);
+    L.circleMarker(pts[0],{radius:8,color:'#FF6B35',fillColor:'#FF6B35',fillOpacity:.95,weight:2}).bindTooltip('Tee',{permanent:true,direction:'right',className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[1],{radius:6,color:'#FFD700',fillColor:'#FFD700',fillOpacity:.85,weight:2}).bindTooltip('Fwy',{permanent:false,className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[pts.length-1],{radius:8,color:'#4CAF50',fillColor:'#4CAF50',fillOpacity:.95,weight:2}).bindTooltip('Green',{permanent:true,direction:'left',className:'map-tip'}).addTo(map);
+    const fg=L.featureGroup(pts.map(p=>L.marker(p)));
+    map.fitBounds(fg.getBounds().pad(0.42));
+    window._maps = window._maps || {}; window._maps[2] = map;
+  })();
+
+  (function(){
+    const pts = [[24.8809905984905,121.09577728747034],[24.8819842726937,121.09395827348794]];
+    const map = L.map('map3', {zoomControl:true, attributionControl:false, scrollWheelZoom:false});
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(map);
+    L.polyline(pts,{color:'white',weight:3,opacity:.9}).addTo(map);
+    L.circleMarker(pts[0],{radius:8,color:'#FF6B35',fillColor:'#FF6B35',fillOpacity:.95,weight:2}).bindTooltip('Tee',{permanent:true,direction:'right',className:'map-tip'}).addTo(map);
+    
+    L.circleMarker(pts[pts.length-1],{radius:8,color:'#4CAF50',fillColor:'#4CAF50',fillOpacity:.95,weight:2}).bindTooltip('Green',{permanent:true,direction:'left',className:'map-tip'}).addTo(map);
+    const fg=L.featureGroup(pts.map(p=>L.marker(p)));
+    map.fitBounds(fg.getBounds().pad(0.42));
+    window._maps = window._maps || {}; window._maps[3] = map;
+  })();
+
+  (function(){
+    const pts = [[24.88206763182012,121.09345535161243],[24.88230608862528,121.0910225880448],[24.88253265980425,121.08882404918131]];
+    const map = L.map('map4', {zoomControl:true, attributionControl:false, scrollWheelZoom:false});
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(map);
+    L.polyline(pts,{color:'white',weight:3,opacity:.9}).addTo(map);
+    L.circleMarker(pts[0],{radius:8,color:'#FF6B35',fillColor:'#FF6B35',fillOpacity:.95,weight:2}).bindTooltip('Tee',{permanent:true,direction:'right',className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[1],{radius:6,color:'#FFD700',fillColor:'#FFD700',fillOpacity:.85,weight:2}).bindTooltip('Fwy',{permanent:false,className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[pts.length-1],{radius:8,color:'#4CAF50',fillColor:'#4CAF50',fillOpacity:.95,weight:2}).bindTooltip('Green',{permanent:true,direction:'left',className:'map-tip'}).addTo(map);
+    const fg=L.featureGroup(pts.map(p=>L.marker(p)));
+    map.fitBounds(fg.getBounds().pad(0.42));
+    window._maps = window._maps || {}; window._maps[4] = map;
+  })();
+
+  (function(){
+    const pts = [[24.88201987720301,121.08765593947008],[24.88114512580811,121.0898982662154],[24.88033819155974,121.09168011783574]];
+    const map = L.map('map5', {zoomControl:true, attributionControl:false, scrollWheelZoom:false});
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(map);
+    L.polyline(pts,{color:'white',weight:3,opacity:.9}).addTo(map);
+    L.circleMarker(pts[0],{radius:8,color:'#FF6B35',fillColor:'#FF6B35',fillOpacity:.95,weight:2}).bindTooltip('Tee',{permanent:true,direction:'right',className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[1],{radius:6,color:'#FFD700',fillColor:'#FFD700',fillOpacity:.85,weight:2}).bindTooltip('Fwy',{permanent:false,className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[pts.length-1],{radius:8,color:'#4CAF50',fillColor:'#4CAF50',fillOpacity:.95,weight:2}).bindTooltip('Green',{permanent:true,direction:'left',className:'map-tip'}).addTo(map);
+    const fg=L.featureGroup(pts.map(p=>L.marker(p)));
+    map.fitBounds(fg.getBounds().pad(0.42));
+    window._maps = window._maps || {}; window._maps[5] = map;
+  })();
+
+  (function(){
+    const pts = [[24.8809203706035,121.09206768935302],[24.87966237004984,121.09408202833218],[24.8796577825324,121.09501362738908]];
+    const map = L.map('map6', {zoomControl:true, attributionControl:false, scrollWheelZoom:false});
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(map);
+    L.polyline(pts,{color:'white',weight:3,opacity:.9}).addTo(map);
+    L.circleMarker(pts[0],{radius:8,color:'#FF6B35',fillColor:'#FF6B35',fillOpacity:.95,weight:2}).bindTooltip('Tee',{permanent:true,direction:'right',className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[1],{radius:6,color:'#FFD700',fillColor:'#FFD700',fillOpacity:.85,weight:2}).bindTooltip('Fwy',{permanent:false,className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[pts.length-1],{radius:8,color:'#4CAF50',fillColor:'#4CAF50',fillOpacity:.95,weight:2}).bindTooltip('Green',{permanent:true,direction:'left',className:'map-tip'}).addTo(map);
+    const fg=L.featureGroup(pts.map(p=>L.marker(p)));
+    map.fitBounds(fg.getBounds().pad(0.42));
+    window._maps = window._maps || {}; window._maps[6] = map;
+  })();
+
+  (function(){
+    const pts = [[24.87822884996593,121.09581023578122],[24.87889557527182,121.0934753728427],[24.87827901099644,121.09282715078987]];
+    const map = L.map('map7', {zoomControl:true, attributionControl:false, scrollWheelZoom:false});
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(map);
+    L.polyline(pts,{color:'white',weight:3,opacity:.9}).addTo(map);
+    L.circleMarker(pts[0],{radius:8,color:'#FF6B35',fillColor:'#FF6B35',fillOpacity:.95,weight:2}).bindTooltip('Tee',{permanent:true,direction:'right',className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[1],{radius:6,color:'#FFD700',fillColor:'#FFD700',fillOpacity:.85,weight:2}).bindTooltip('Fwy',{permanent:false,className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[pts.length-1],{radius:8,color:'#4CAF50',fillColor:'#4CAF50',fillOpacity:.95,weight:2}).bindTooltip('Green',{permanent:true,direction:'left',className:'map-tip'}).addTo(map);
+    const fg=L.featureGroup(pts.map(p=>L.marker(p)));
+    map.fitBounds(fg.getBounds().pad(0.42));
+    window._maps = window._maps || {}; window._maps[7] = map;
+  })();
+
+  (function(){
+    const pts = [[24.87785502687617,121.09245833936507],[24.87909264150712,121.091505686589]];
+    const map = L.map('map8', {zoomControl:true, attributionControl:false, scrollWheelZoom:false});
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(map);
+    L.polyline(pts,{color:'white',weight:3,opacity:.9}).addTo(map);
+    L.circleMarker(pts[0],{radius:8,color:'#FF6B35',fillColor:'#FF6B35',fillOpacity:.95,weight:2}).bindTooltip('Tee',{permanent:true,direction:'right',className:'map-tip'}).addTo(map);
+    
+    L.circleMarker(pts[pts.length-1],{radius:8,color:'#4CAF50',fillColor:'#4CAF50',fillOpacity:.95,weight:2}).bindTooltip('Green',{permanent:true,direction:'left',className:'map-tip'}).addTo(map);
+    const fg=L.featureGroup(pts.map(p=>L.marker(p)));
+    map.fitBounds(fg.getBounds().pad(0.42));
+    window._maps = window._maps || {}; window._maps[8] = map;
+  })();
+
+  (function(){
+    const pts = [[24.87964499791893,121.09176720197706],[24.8804522576114,121.08949133994248],[24.88159130147868,121.0875274943678]];
+    const map = L.map('map9', {zoomControl:true, attributionControl:false, scrollWheelZoom:false});
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(map);
+    L.polyline(pts,{color:'white',weight:3,opacity:.9}).addTo(map);
+    L.circleMarker(pts[0],{radius:8,color:'#FF6B35',fillColor:'#FF6B35',fillOpacity:.95,weight:2}).bindTooltip('Tee',{permanent:true,direction:'right',className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[1],{radius:6,color:'#FFD700',fillColor:'#FFD700',fillOpacity:.85,weight:2}).bindTooltip('Fwy',{permanent:false,className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[pts.length-1],{radius:8,color:'#4CAF50',fillColor:'#4CAF50',fillOpacity:.95,weight:2}).bindTooltip('Green',{permanent:true,direction:'left',className:'map-tip'}).addTo(map);
+    const fg=L.featureGroup(pts.map(p=>L.marker(p)));
+    map.fitBounds(fg.getBounds().pad(0.42));
+    window._maps = window._maps || {}; window._maps[9] = map;
+  })();
+
+  (function(){
+    const pts = [[24.88223795527153,121.08717879951061],[24.88020375690947,121.0862078398561],[24.87946796894103,121.08603168658988]];
+    const map = L.map('map10', {zoomControl:true, attributionControl:false, scrollWheelZoom:false});
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(map);
+    L.polyline(pts,{color:'white',weight:3,opacity:.9}).addTo(map);
+    L.circleMarker(pts[0],{radius:8,color:'#FF6B35',fillColor:'#FF6B35',fillOpacity:.95,weight:2}).bindTooltip('Tee',{permanent:true,direction:'right',className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[1],{radius:6,color:'#FFD700',fillColor:'#FFD700',fillOpacity:.85,weight:2}).bindTooltip('Fwy',{permanent:false,className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[pts.length-1],{radius:8,color:'#4CAF50',fillColor:'#4CAF50',fillOpacity:.95,weight:2}).bindTooltip('Green',{permanent:true,direction:'left',className:'map-tip'}).addTo(map);
+    const fg=L.featureGroup(pts.map(p=>L.marker(p)));
+    map.fitBounds(fg.getBounds().pad(0.42));
+    window._maps = window._maps || {}; window._maps[10] = map;
+  })();
+
+  (function(){
+    const pts = [[24.8791668702126,121.08629319428346],[24.87821670758996,121.08850331913212],[24.87738839859537,121.09118909827336]];
+    const map = L.map('map11', {zoomControl:true, attributionControl:false, scrollWheelZoom:false});
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(map);
+    L.polyline(pts,{color:'white',weight:3,opacity:.9}).addTo(map);
+    L.circleMarker(pts[0],{radius:8,color:'#FF6B35',fillColor:'#FF6B35',fillOpacity:.95,weight:2}).bindTooltip('Tee',{permanent:true,direction:'right',className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[1],{radius:6,color:'#FFD700',fillColor:'#FFD700',fillOpacity:.85,weight:2}).bindTooltip('Fwy',{permanent:false,className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[pts.length-1],{radius:8,color:'#4CAF50',fillColor:'#4CAF50',fillOpacity:.95,weight:2}).bindTooltip('Green',{permanent:true,direction:'left',className:'map-tip'}).addTo(map);
+    const fg=L.featureGroup(pts.map(p=>L.marker(p)));
+    map.fitBounds(fg.getBounds().pad(0.42));
+    window._maps = window._maps || {}; window._maps[11] = map;
+  })();
+
+  (function(){
+    const pts = [[24.87680259450427,121.0914090317273],[24.87683057790466,121.09385654746234],[24.87695495538147,121.09462184956034]];
+    const map = L.map('map12', {zoomControl:true, attributionControl:false, scrollWheelZoom:false});
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(map);
+    L.polyline(pts,{color:'white',weight:3,opacity:.9}).addTo(map);
+    L.circleMarker(pts[0],{radius:8,color:'#FF6B35',fillColor:'#FF6B35',fillOpacity:.95,weight:2}).bindTooltip('Tee',{permanent:true,direction:'right',className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[1],{radius:6,color:'#FFD700',fillColor:'#FFD700',fillOpacity:.85,weight:2}).bindTooltip('Fwy',{permanent:false,className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[pts.length-1],{radius:8,color:'#4CAF50',fillColor:'#4CAF50',fillOpacity:.95,weight:2}).bindTooltip('Green',{permanent:true,direction:'left',className:'map-tip'}).addTo(map);
+    const fg=L.featureGroup(pts.map(p=>L.marker(p)));
+    map.fitBounds(fg.getBounds().pad(0.42));
+    window._maps = window._maps || {}; window._maps[12] = map;
+  })();
+
+  (function(){
+    const pts = [[24.87739295503223,121.0941725795593],[24.87724786193789,121.09578947532506]];
+    const map = L.map('map13', {zoomControl:true, attributionControl:false, scrollWheelZoom:false});
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(map);
+    L.polyline(pts,{color:'white',weight:3,opacity:.9}).addTo(map);
+    L.circleMarker(pts[0],{radius:8,color:'#FF6B35',fillColor:'#FF6B35',fillOpacity:.95,weight:2}).bindTooltip('Tee',{permanent:true,direction:'right',className:'map-tip'}).addTo(map);
+    
+    L.circleMarker(pts[pts.length-1],{radius:8,color:'#4CAF50',fillColor:'#4CAF50',fillOpacity:.95,weight:2}).bindTooltip('Green',{permanent:true,direction:'left',className:'map-tip'}).addTo(map);
+    const fg=L.featureGroup(pts.map(p=>L.marker(p)));
+    map.fitBounds(fg.getBounds().pad(0.42));
+    window._maps = window._maps || {}; window._maps[13] = map;
+  })();
+
+  (function(){
+    const pts = [[24.87781423897282,121.0961354726027],[24.87806365390027,121.09370807345317],[24.87741180171799,121.09259180592723]];
+    const map = L.map('map14', {zoomControl:true, attributionControl:false, scrollWheelZoom:false});
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(map);
+    L.polyline(pts,{color:'white',weight:3,opacity:.9}).addTo(map);
+    L.circleMarker(pts[0],{radius:8,color:'#FF6B35',fillColor:'#FF6B35',fillOpacity:.95,weight:2}).bindTooltip('Tee',{permanent:true,direction:'right',className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[1],{radius:6,color:'#FFD700',fillColor:'#FFD700',fillOpacity:.85,weight:2}).bindTooltip('Fwy',{permanent:false,className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[pts.length-1],{radius:8,color:'#4CAF50',fillColor:'#4CAF50',fillOpacity:.95,weight:2}).bindTooltip('Green',{permanent:true,direction:'left',className:'map-tip'}).addTo(map);
+    const fg=L.featureGroup(pts.map(p=>L.marker(p)));
+    map.fitBounds(fg.getBounds().pad(0.42));
+    window._maps = window._maps || {}; window._maps[14] = map;
+  })();
+
+  (function(){
+    const pts = [[24.87772326714676,121.09222300219663],[24.87842834055883,121.08990154260891],[24.8787711269052,121.08882281831482]];
+    const map = L.map('map15', {zoomControl:true, attributionControl:false, scrollWheelZoom:false});
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(map);
+    L.polyline(pts,{color:'white',weight:3,opacity:.9}).addTo(map);
+    L.circleMarker(pts[0],{radius:8,color:'#FF6B35',fillColor:'#FF6B35',fillOpacity:.95,weight:2}).bindTooltip('Tee',{permanent:true,direction:'right',className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[1],{radius:6,color:'#FFD700',fillColor:'#FFD700',fillOpacity:.85,weight:2}).bindTooltip('Fwy',{permanent:false,className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[pts.length-1],{radius:8,color:'#4CAF50',fillColor:'#4CAF50',fillOpacity:.95,weight:2}).bindTooltip('Green',{permanent:true,direction:'left',className:'map-tip'}).addTo(map);
+    const fg=L.featureGroup(pts.map(p=>L.marker(p)));
+    map.fitBounds(fg.getBounds().pad(0.42));
+    window._maps = window._maps || {}; window._maps[15] = map;
+  })();
+
+  (function(){
+    const pts = [[24.87887760453128,121.08835476515651],[24.87979766685287,121.08689517487643]];
+    const map = L.map('map16', {zoomControl:true, attributionControl:false, scrollWheelZoom:false});
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(map);
+    L.polyline(pts,{color:'white',weight:3,opacity:.9}).addTo(map);
+    L.circleMarker(pts[0],{radius:8,color:'#FF6B35',fillColor:'#FF6B35',fillOpacity:.95,weight:2}).bindTooltip('Tee',{permanent:true,direction:'right',className:'map-tip'}).addTo(map);
+    
+    L.circleMarker(pts[pts.length-1],{radius:8,color:'#4CAF50',fillColor:'#4CAF50',fillOpacity:.95,weight:2}).bindTooltip('Green',{permanent:true,direction:'left',className:'map-tip'}).addTo(map);
+    const fg=L.featureGroup(pts.map(p=>L.marker(p)));
+    map.fitBounds(fg.getBounds().pad(0.42));
+    window._maps = window._maps || {}; window._maps[16] = map;
+  })();
+
+  (function(){
+    const pts = [[24.88063714549623,121.08696491231977],[24.87929095613272,121.08891084727475],[24.87883499209597,121.09088448453393]];
+    const map = L.map('map17', {zoomControl:true, attributionControl:false, scrollWheelZoom:false});
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(map);
+    L.polyline(pts,{color:'white',weight:3,opacity:.9}).addTo(map);
+    L.circleMarker(pts[0],{radius:8,color:'#FF6B35',fillColor:'#FF6B35',fillOpacity:.95,weight:2}).bindTooltip('Tee',{permanent:true,direction:'right',className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[1],{radius:6,color:'#FFD700',fillColor:'#FFD700',fillOpacity:.85,weight:2}).bindTooltip('Fwy',{permanent:false,className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[pts.length-1],{radius:8,color:'#4CAF50',fillColor:'#4CAF50',fillOpacity:.95,weight:2}).bindTooltip('Green',{permanent:true,direction:'left',className:'map-tip'}).addTo(map);
+    const fg=L.featureGroup(pts.map(p=>L.marker(p)));
+    map.fitBounds(fg.getBounds().pad(0.42));
+    window._maps = window._maps || {}; window._maps[17] = map;
+  })();
+
+  (function(){
+    const pts = [[24.87937639986405,121.09115538765354],[24.88002063197525,121.08881649370711],[24.88083605623557,121.08740518318949]];
+    const map = L.map('map18', {zoomControl:true, attributionControl:false, scrollWheelZoom:false});
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:20}).addTo(map);
+    L.polyline(pts,{color:'white',weight:3,opacity:.9}).addTo(map);
+    L.circleMarker(pts[0],{radius:8,color:'#FF6B35',fillColor:'#FF6B35',fillOpacity:.95,weight:2}).bindTooltip('Tee',{permanent:true,direction:'right',className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[1],{radius:6,color:'#FFD700',fillColor:'#FFD700',fillOpacity:.85,weight:2}).bindTooltip('Fwy',{permanent:false,className:'map-tip'}).addTo(map);
+    L.circleMarker(pts[pts.length-1],{radius:8,color:'#4CAF50',fillColor:'#4CAF50',fillOpacity:.95,weight:2}).bindTooltip('Green',{permanent:true,direction:'left',className:'map-tip'}).addTo(map);
+    const fg=L.featureGroup(pts.map(p=>L.marker(p)));
+    map.fitBounds(fg.getBounds().pad(0.42));
+    window._maps = window._maps || {}; window._maps[18] = map;
+  })();
+}
+// Also init if already authenticated
+if(sessionStorage.getItem('tsg_auth')==='1') window.addEventListener('DOMContentLoaded', initMaps);
+</script>
+</body>
+</html>
