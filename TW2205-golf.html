@@ -15,7 +15,7 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
 #gate{position:fixed;inset:0;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 60%,#0f172a 100%);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:30px;text-align:center}
 #gate h1{font-size:2em;color:#f0c040;letter-spacing:.04em}
 #gate .tagline{color:#94a3b8;font-size:1em}
-#gate input{padding:12px 20px;font-size:1.1em;border-radius:8px;border:2px solid #334155;background:#1e293b;color:#fff;width:260px;text-align:center}
+#gate input{padding:12px 20px;font-size:1.1em;border-radius:8px;border:2px solid #334155;background:#1e293b;color:#fff;width:min(260px,85vw);text-align:center}
 #gate input:focus{outline:none;border-color:#f0c040}
 #gate button{padding:12px 32px;background:#f0c040;color:#0f172a;border:none;border-radius:8px;font-size:1.05em;font-weight:700;cursor:pointer}
 #gate button:hover{opacity:.85}
@@ -34,10 +34,18 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
 .wx-item strong{color:#f0c040}
 .wind-badge{background:#1e3a5f;border-radius:6px;padding:3px 10px;font-weight:600;color:#7dd3fc}
 .maintenance-note{background:rgba(234,179,8,.12);border:1px solid rgba(234,179,8,.35);border-radius:8px;padding:8px 14px;font-size:.84em;color:#fde68a;margin-top:10px}
+@media(max-width:480px){
+  #tourney-header{padding:12px 14px}
+  .course-name-cn{font-size:1.25em}
+  .course-name-en{font-size:.85em}
+  .meta-pill{font-size:.78em;padding:4px 10px}
+  .weather-block{font-size:.8em;padding:8px 12px;gap:10px}
+  .maintenance-note{font-size:.78em}
+}
 
 /* Sticky nav */
 #hole-nav{position:sticky;top:0;z-index:100;background:#0f172a;border-bottom:1px solid #1e3a5f;overflow-x:auto;white-space:nowrap;padding:0 8px;display:flex;align-items:stretch;-webkit-overflow-scrolling:touch}
-.nav-item{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 9px;text-decoration:none;color:#94a3b8;font-size:.8em;font-weight:600;border-bottom:3px solid transparent;transition:all .2s;cursor:pointer;min-width:40px;-webkit-tap-highlight-color:transparent}
+.nav-item{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 9px;min-height:44px;text-decoration:none;color:#94a3b8;font-size:.8em;font-weight:600;border-bottom:3px solid transparent;transition:all .2s;cursor:pointer;min-width:44px;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .nav-item:hover,.nav-item:active{color:#f0c040}
 .nav-item.active{color:#f0c040;border-bottom-color:#f0c040}
 .nav-par{font-size:.66em;color:#4b5563;font-weight:400}
@@ -46,7 +54,8 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
 /* Scorecard */
 .sc-title{font-size:1.1em;font-weight:700;color:#f0c040;margin-bottom:8px}
 .sc-note{font-size:.78em;color:#6b7280;margin-bottom:10px}
-.sc-table{width:100%;border-collapse:collapse;font-size:.87em}
+.sc-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px}
+.sc-table{width:100%;border-collapse:collapse;font-size:.87em;min-width:340px}
 .sc-table th{background:#1e3a5f;color:#93c5fd;padding:7px 10px;text-align:center;font-weight:600}
 .sc-table td{padding:6px 10px;text-align:center;border-bottom:1px solid #1e293b}
 .sc-table .hnum{font-weight:700;color:#e2e8f0}
@@ -58,9 +67,16 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
 .sc-table .par5 td{background:rgba(16,185,129,.06)}
 .sc-table .total-row td{background:#1e293b}
 .sc-table .grand td{background:#1e3a5f;font-size:.94em}
+@media(max-width:480px){
+  .sc-table{font-size:.78em}
+  .sc-table th,.sc-table td{padding:5px 7px}
+}
 
 /* Hole section */
 .hole-section{max-width:1100px;margin:30px auto;padding:0 16px}
+@media(max-width:480px){
+  .hole-section{margin:16px auto;padding:0 12px}
+}
 .hole-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #1e3a5f}
 .hole-title-block{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .hole-number{font-size:2em;font-weight:800;color:#f0c040}
@@ -118,7 +134,7 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
 
 /* Nav buttons */
 .hole-nav-btns{display:flex;justify-content:space-between;margin-top:16px;padding-top:12px;border-top:1px solid #1e293b}
-.nav-btn{background:#1e3a5f;color:#93c5fd;border:1px solid #2563eb;border-radius:8px;padding:10px 20px;cursor:pointer;font-size:.9em;font-weight:600;transition:background .2s;-webkit-tap-highlight-color:transparent}
+.nav-btn{background:#1e3a5f;color:#93c5fd;border:1px solid #2563eb;border-radius:8px;padding:10px 20px;cursor:pointer;font-size:.9em;font-weight:600;transition:background .2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:44px}
 .nav-btn:hover,.nav-btn:active{background:#2563eb;color:#fff}
 
 /* Print */
@@ -139,11 +155,11 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
 }
 
 /* ── ONE-HOLE-AT-A-TIME VIEW ────────────────────────── */
-.hole-section        { display: none; }
-.hole-section.active { display: block; animation: hfade .18s ease; }
-@keyframes hfade     { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
+.hole-section               { display: none !important; }
+.hole-section.active        { display: block !important; animation: hfade .18s ease; }
+@keyframes hfade            { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
 /* Hole counter pill in nav area */
-#hole-counter        { text-align:center; padding:6px 0 2px; font-size:.78em; color:#4b5563; letter-spacing:.05em; }
+#hole-counter               { text-align:center; padding:6px 0 2px; font-size:.78em; color:#4b5563; letter-spacing:.05em; }
 
 </style>
 </head>
@@ -189,10 +205,12 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
 <section id="scorecard-section" class="hole-section active" style="max-width:1100px;margin:26px auto;padding:0 16px">
   <div class="sc-title">📊 Official Scorecard — Blue / White / Red Tees</div>
   <div class="sc-note">Source: 再興高爾夫俱樂部 official scorecard · H15 closed (maintenance) · H10A substitutes</div>
+  <div class="sc-table-wrap">
   <table class="sc-table">
     <thead><tr><th>H</th><th>Par</th><th>HCP</th><th class="blue">Blue</th><th class="white">White</th><th class="red">Red</th></tr></thead>
     <tbody><tr class="par4"><td class="hnum">1</td><td>4</td><td class="hcp">2</td><td class="blue">407</td><td class="white">379</td><td class="red">310</td></tr><tr class="par4"><td class="hnum">2</td><td>4</td><td class="hcp">1</td><td class="blue">416</td><td class="white">391</td><td class="red">328</td></tr><tr class="par3"><td class="hnum">3</td><td>3</td><td class="hcp">8</td><td class="blue">235</td><td class="white">212</td><td class="red">168</td></tr><tr class="par5"><td class="hnum">4</td><td>5</td><td class="hcp">11</td><td class="blue">516</td><td class="white">501</td><td class="red">486</td></tr><tr class="par5"><td class="hnum">5</td><td>5</td><td class="hcp">17</td><td class="blue">510</td><td class="white">460</td><td class="red">330</td></tr><tr class="par4"><td class="hnum">6</td><td>4</td><td class="hcp">7</td><td class="blue">371</td><td class="white">346</td><td class="red">277</td></tr><tr class="par4"><td class="hnum">7</td><td>4</td><td class="hcp">4</td><td class="blue">393</td><td class="white">366</td><td class="red">293</td></tr><tr class="par3"><td class="hnum">8</td><td>3</td><td class="hcp">9</td><td class="blue">186</td><td class="white">170</td><td class="red">153</td></tr><tr class="par5"><td class="hnum">9</td><td>5</td><td class="hcp">18</td><td class="blue">533</td><td class="white">505</td><td class="red">480</td></tr><tr class="total-row "><td colspan="2"><strong>OUT (H1–9)</strong></td><td class="hcp"><strong>Par 37</strong></td><td class="blue"><strong>3567</strong></td><td class="white"><strong>3330</strong></td><td class="red"><strong>2825</strong></td></tr><tr class="par4"><td class="hnum">10</td><td>4</td><td class="hcp">10</td><td class="blue">360</td><td class="white">330</td><td class="red">255</td></tr><tr class="par5"><td class="hnum">11</td><td>5</td><td class="hcp">13</td><td class="blue">588</td><td class="white">561</td><td class="red">479</td></tr><tr class="par4"><td class="hnum">12</td><td>4</td><td class="hcp">5</td><td class="blue">352</td><td class="white">328</td><td class="red">287</td></tr><tr class="par3"><td class="hnum">13</td><td>3</td><td class="hcp">14</td><td class="blue">184</td><td class="white">158</td><td class="red">120</td></tr><tr class="par4"><td class="hnum">14</td><td>4</td><td class="hcp">3</td><td class="blue">416</td><td class="white">393</td><td class="red">321</td></tr><tr class="par3"><td class="hnum">16</td><td>3</td><td class="hcp">15</td><td class="blue">186</td><td class="white">164</td><td class="red">118</td></tr><tr class="par5"><td class="hnum">17</td><td>5</td><td class="hcp">16</td><td class="blue">519</td><td class="white">516</td><td class="red">493</td></tr><tr class="par4"><td class="hnum">18</td><td>4</td><td class="hcp">6</td><td class="blue">457</td><td class="white">417</td><td class="red">381</td></tr><tr class="par3"><td class="hnum">10A</td><td>3</td><td class="hcp">12</td><td class="blue">167</td><td class="white">152</td><td class="red">133</td></tr><tr class="total-row "><td colspan="2"><strong>IN (H10–10A)</strong></td><td class="hcp"><strong>Par 35</strong></td><td class="blue"><strong>3229</strong></td><td class="white"><strong>3019</strong></td><td class="red"><strong>2587</strong></td></tr><tr class="total-row grand"><td colspan="2"><strong>TOTAL</strong></td><td class="hcp"><strong>Par 72</strong></td><td class="blue"><strong>6796</strong></td><td class="white"><strong>6349</strong></td><td class="red"><strong>5412</strong></td></tr></tbody>
   </table>
+  </div>
   <div style="margin-top:8px;font-size:.76em;color:#4b5563">Par 3 = indigo · Par 4 = default · Par 5 = green tint &nbsp;|&nbsp; GPS maps are layout reference only — official scorecard is distance source of truth</div>
   <div class="hole-nav-btns" style="margin-top:20px">
     <span></span>
@@ -263,7 +281,9 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
       <div class="caddie-course-note">Par 3 at 235y — long but manageable with the right club. WSW wind could be into or across you. Large green: aim centre, give yourself a putt not a chip.</div>
       <div class="shot-plan-title">📋 Shot Strategy (Blue 235y)</div>
       <div class="shot-row"><div class="shot-num">Shot 1</div><div class="club-badge badge-approach">⛳ Long Iron</div><div class="shot-note">Long iron tee shot — 235y par 3. This requires a full long-iron or fairway wood. Club up for the wind; aim for the front-centre of the large green.</div></div><div class="shot-row"><div class="shot-num">Shot 2</div><div class="club-badge badge-chip">🌀 Chip/Pitch</div><div class="shot-note">Chip or pitch onto the green if you fell short. Large greens — land it on and two-putt is very achievable.</div></div>
-    <div class="hole-nav-btns">
+    </div>
+  </div>
+  <div class="hole-nav-btns">
     <button class="nav-btn" onclick="goHole('2')">← H2</button>
     <button class="nav-btn" onclick="goHole('4')">H4 →</button>
   </div>
@@ -376,7 +396,9 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
       <div class="caddie-course-note">Par 3 at 186y. A single iron or fairway wood. This course has enormous greens — go one club more than instinct says, aim for the centre.</div>
       <div class="shot-plan-title">📋 Shot Strategy (Blue 186y)</div>
       <div class="shot-row"><div class="shot-num">Shot 1</div><div class="club-badge badge-approach">⛳ Long Iron</div><div class="shot-note">186y par 3 — a long iron to the green. Pick enough club to carry the full distance; these large greens are very forgiving. Aim for the centre.</div></div>
-    <div class="hole-nav-btns">
+    </div>
+  </div>
+  <div class="hole-nav-btns">
     <button class="nav-btn" onclick="goHole('7')">← H7</button>
     <button class="nav-btn" onclick="goHole('9')">H9 →</button>
   </div>
@@ -489,7 +511,9 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
       <div class="caddie-course-note">Short par 3 at 184y. A mid-iron to the big green. HCP 14 — should be manageable. Aim centre, avoid back bunkers.</div>
       <div class="shot-plan-title">📋 Shot Strategy (Blue 184y)</div>
       <div class="shot-row"><div class="shot-num">Shot 1</div><div class="club-badge badge-approach">⛳ Long Iron</div><div class="shot-note">184y par 3 — a long iron to the green. HCP 14 so it's meant to be manageable. Take one extra club for the WSW coastal wind, aim for the centre of the big green.</div></div>
-    <div class="hole-nav-btns">
+    </div>
+  </div>
+  <div class="hole-nav-btns">
     <button class="nav-btn" onclick="goHole('12')">← H12</button>
     <button class="nav-btn" onclick="goHole('14')">H14 →</button>
   </div>
@@ -533,7 +557,9 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
       <div class="caddie-course-note">Par 3 at 186y — check for water/hazards on this hole. Take an extra club to be safe. Large green: landing anywhere on the surface is a win.</div>
       <div class="shot-plan-title">📋 Shot Strategy (Blue 186y)</div>
       <div class="shot-row"><div class="shot-num">Shot 1</div><div class="club-badge badge-approach">⛳ Long Iron</div><div class="shot-note">186y par 3 — long iron to the green. There is water/hazard on this hole so DO NOT be short. Take an extra club, aim for the safe centre of the green.</div></div>
-    <div class="hole-nav-btns">
+    </div>
+  </div>
+  <div class="hole-nav-btns">
     <button class="nav-btn" onclick="goHole('14')">← H14</button>
     <button class="nav-btn" onclick="goHole('17')">H17 →</button>
   </div>
@@ -600,7 +626,9 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
       <div class="caddie-course-note">Bonus hole 10A — par 3 at 167y. Short and tight. Pick a conservative club, aim for the centre of the green, and enjoy the extra hole.</div>
       <div class="shot-plan-title">📋 Shot Strategy (Blue 167y)</div>
       <div class="shot-row"><div class="shot-num">Shot 1</div><div class="club-badge badge-approach">⛳ Long Iron</div><div class="shot-note">167y par 3 bonus hole — a mid-to-long iron to the green. Short and straightforward. Aim for the centre and enjoy the extra hole.</div></div>
-    <div class="hole-nav-btns">
+    </div>
+  </div>
+  <div class="hole-nav-btns">
     <button class="nav-btn" onclick="goHole('18')">← H18</button>
     <span></span>
   </div>
