@@ -44,7 +44,6 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
 .nav-item.active .nav-par{color:#b45309}
 
 /* Scorecard */
-#scorecard-section{max-width:1100px;margin:26px auto;padding:0 16px}
 .sc-title{font-size:1.1em;font-weight:700;color:#f0c040;margin-bottom:8px}
 .sc-note{font-size:.78em;color:#6b7280;margin-bottom:10px}
 .sc-table{width:100%;border-collapse:collapse;font-size:.87em}
@@ -125,9 +124,9 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
 /* Print */
 @media print{
   body{background:#fff;color:#000}
-  #gate,#hole-nav,#scorecard-section,#tourney-header{display:none!important}
+  #gate,#hole-nav,#tourney-header{display:none!important}
   #app{display:block!important}
-  .hole-section{page-break-before:always;max-width:100%;padding:8px;margin:0}
+  .hole-section{page-break-before:always;max-width:100%;padding:8px;margin:0;display:block!important}
   .hole-section:first-child{page-break-before:auto}
   .leaflet-map{height:300px!important}
   .map-container{border:1px solid #aaa}
@@ -184,10 +183,10 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
   </div>
 </div>
 
-<div id="hole-nav"><a href="#hole1" class="nav-item" data-h="1" onclick=\"goHole('1');return false;\">H1<span class="nav-par">4</span></a><a href="#hole2" class="nav-item" data-h="2" onclick=\"goHole('2');return false;\">H2<span class="nav-par">4</span></a><a href="#hole3" class="nav-item" data-h="3" onclick=\"goHole('3');return false;\">H3<span class="nav-par">3</span></a><a href="#hole4" class="nav-item" data-h="4" onclick=\"goHole('4');return false;\">H4<span class="nav-par">5</span></a><a href="#hole5" class="nav-item" data-h="5" onclick=\"goHole('5');return false;\">H5<span class="nav-par">5</span></a><a href="#hole6" class="nav-item" data-h="6" onclick=\"goHole('6');return false;\">H6<span class="nav-par">4</span></a><a href="#hole7" class="nav-item" data-h="7" onclick=\"goHole('7');return false;\">H7<span class="nav-par">4</span></a><a href="#hole8" class="nav-item" data-h="8" onclick=\"goHole('8');return false;\">H8<span class="nav-par">3</span></a><a href="#hole9" class="nav-item" data-h="9" onclick=\"goHole('9');return false;\">H9<span class="nav-par">5</span></a><a href="#hole10" class="nav-item" data-h="10" onclick=\"goHole('10');return false;\">H10<span class="nav-par">4</span></a><a href="#hole11" class="nav-item" data-h="11" onclick=\"goHole('11');return false;\">H11<span class="nav-par">5</span></a><a href="#hole12" class="nav-item" data-h="12" onclick=\"goHole('12');return false;\">H12<span class="nav-par">4</span></a><a href="#hole13" class="nav-item" data-h="13" onclick=\"goHole('13');return false;\">H13<span class="nav-par">3</span></a><a href="#hole14" class="nav-item" data-h="14" onclick=\"goHole('14');return false;\">H14<span class="nav-par">4</span></a><a href="#hole16" class="nav-item" data-h="16" onclick=\"goHole('16');return false;\">H16<span class="nav-par">3</span></a><a href="#hole17" class="nav-item" data-h="17" onclick=\"goHole('17');return false;\">H17<span class="nav-par">5</span></a><a href="#hole18" class="nav-item" data-h="18" onclick=\"goHole('18');return false;\">H18<span class="nav-par">4</span></a><a href="#hole10A" class="nav-item" data-h="10A" onclick=\"goHole('10A');return false;\">10A<span class="nav-par">3</span></a></div>
+<div id="hole-nav"><a href="#" class="nav-item sc-nav-item active" data-h="SC" onclick="showScorecard();return false;">📊<span class="nav-par">Card</span></a><a href="#" class="nav-item" data-h="1" onclick="showHole('1');return false;">H1<span class="nav-par">4</span></a><a href="#" class="nav-item" data-h="2" onclick="showHole('2');return false;">H2<span class="nav-par">4</span></a><a href="#" class="nav-item" data-h="3" onclick="showHole('3');return false;">H3<span class="nav-par">3</span></a><a href="#" class="nav-item" data-h="4" onclick="showHole('4');return false;">H4<span class="nav-par">5</span></a><a href="#" class="nav-item" data-h="5" onclick="showHole('5');return false;">H5<span class="nav-par">5</span></a><a href="#" class="nav-item" data-h="6" onclick="showHole('6');return false;">H6<span class="nav-par">4</span></a><a href="#" class="nav-item" data-h="7" onclick="showHole('7');return false;">H7<span class="nav-par">4</span></a><a href="#" class="nav-item" data-h="8" onclick="showHole('8');return false;">H8<span class="nav-par">3</span></a><a href="#" class="nav-item" data-h="9" onclick="showHole('9');return false;">H9<span class="nav-par">5</span></a><a href="#" class="nav-item" data-h="10" onclick="showHole('10');return false;">H10<span class="nav-par">4</span></a><a href="#" class="nav-item" data-h="11" onclick="showHole('11');return false;">H11<span class="nav-par">5</span></a><a href="#" class="nav-item" data-h="12" onclick="showHole('12');return false;">H12<span class="nav-par">4</span></a><a href="#" class="nav-item" data-h="13" onclick="showHole('13');return false;">H13<span class="nav-par">3</span></a><a href="#" class="nav-item" data-h="14" onclick="showHole('14');return false;">H14<span class="nav-par">4</span></a><a href="#" class="nav-item" data-h="16" onclick="showHole('16');return false;">H16<span class="nav-par">3</span></a><a href="#" class="nav-item" data-h="17" onclick="showHole('17');return false;">H17<span class="nav-par">5</span></a><a href="#" class="nav-item" data-h="18" onclick="showHole('18');return false;">H18<span class="nav-par">4</span></a><a href="#" class="nav-item" data-h="10A" onclick="showHole('10A');return false;">10A<span class="nav-par">3</span></a></div>
 <div id="hole-counter"></div>
 
-<div id="scorecard-section">
+<section id="scorecard-section" class="hole-section active" style="max-width:1100px;margin:26px auto;padding:0 16px">
   <div class="sc-title">📊 Official Scorecard — Blue / White / Red Tees</div>
   <div class="sc-note">Source: 再興高爾夫俱樂部 official scorecard · H15 closed (maintenance) · H10A substitutes</div>
   <table class="sc-table">
@@ -195,7 +194,11 @@ body{background:#111827;color:#e5e7eb;font-family:'Segoe UI',Arial,sans-serif}
     <tbody><tr class="par4"><td class="hnum">1</td><td>4</td><td class="hcp">2</td><td class="blue">407</td><td class="white">379</td><td class="red">310</td></tr><tr class="par4"><td class="hnum">2</td><td>4</td><td class="hcp">1</td><td class="blue">416</td><td class="white">391</td><td class="red">328</td></tr><tr class="par3"><td class="hnum">3</td><td>3</td><td class="hcp">8</td><td class="blue">235</td><td class="white">212</td><td class="red">168</td></tr><tr class="par5"><td class="hnum">4</td><td>5</td><td class="hcp">11</td><td class="blue">516</td><td class="white">501</td><td class="red">486</td></tr><tr class="par5"><td class="hnum">5</td><td>5</td><td class="hcp">17</td><td class="blue">510</td><td class="white">460</td><td class="red">330</td></tr><tr class="par4"><td class="hnum">6</td><td>4</td><td class="hcp">7</td><td class="blue">371</td><td class="white">346</td><td class="red">277</td></tr><tr class="par4"><td class="hnum">7</td><td>4</td><td class="hcp">4</td><td class="blue">393</td><td class="white">366</td><td class="red">293</td></tr><tr class="par3"><td class="hnum">8</td><td>3</td><td class="hcp">9</td><td class="blue">186</td><td class="white">170</td><td class="red">153</td></tr><tr class="par5"><td class="hnum">9</td><td>5</td><td class="hcp">18</td><td class="blue">533</td><td class="white">505</td><td class="red">480</td></tr><tr class="total-row "><td colspan="2"><strong>OUT (H1–9)</strong></td><td class="hcp"><strong>Par 37</strong></td><td class="blue"><strong>3567</strong></td><td class="white"><strong>3330</strong></td><td class="red"><strong>2825</strong></td></tr><tr class="par4"><td class="hnum">10</td><td>4</td><td class="hcp">10</td><td class="blue">360</td><td class="white">330</td><td class="red">255</td></tr><tr class="par5"><td class="hnum">11</td><td>5</td><td class="hcp">13</td><td class="blue">588</td><td class="white">561</td><td class="red">479</td></tr><tr class="par4"><td class="hnum">12</td><td>4</td><td class="hcp">5</td><td class="blue">352</td><td class="white">328</td><td class="red">287</td></tr><tr class="par3"><td class="hnum">13</td><td>3</td><td class="hcp">14</td><td class="blue">184</td><td class="white">158</td><td class="red">120</td></tr><tr class="par4"><td class="hnum">14</td><td>4</td><td class="hcp">3</td><td class="blue">416</td><td class="white">393</td><td class="red">321</td></tr><tr class="par3"><td class="hnum">16</td><td>3</td><td class="hcp">15</td><td class="blue">186</td><td class="white">164</td><td class="red">118</td></tr><tr class="par5"><td class="hnum">17</td><td>5</td><td class="hcp">16</td><td class="blue">519</td><td class="white">516</td><td class="red">493</td></tr><tr class="par4"><td class="hnum">18</td><td>4</td><td class="hcp">6</td><td class="blue">457</td><td class="white">417</td><td class="red">381</td></tr><tr class="par3"><td class="hnum">10A</td><td>3</td><td class="hcp">12</td><td class="blue">167</td><td class="white">152</td><td class="red">133</td></tr><tr class="total-row "><td colspan="2"><strong>IN (H10–10A)</strong></td><td class="hcp"><strong>Par 35</strong></td><td class="blue"><strong>3229</strong></td><td class="white"><strong>3019</strong></td><td class="red"><strong>2587</strong></td></tr><tr class="total-row grand"><td colspan="2"><strong>TOTAL</strong></td><td class="hcp"><strong>Par 72</strong></td><td class="blue"><strong>6796</strong></td><td class="white"><strong>6349</strong></td><td class="red"><strong>5412</strong></td></tr></tbody>
   </table>
   <div style="margin-top:8px;font-size:.76em;color:#4b5563">Par 3 = indigo · Par 4 = default · Par 5 = green tint &nbsp;|&nbsp; GPS maps are layout reference only — official scorecard is distance source of truth</div>
-</div>
+  <div class="hole-nav-btns" style="margin-top:20px">
+    <span></span>
+    <button class="nav-btn" onclick="showHole('1')">Start — H1 →</button>
+  </div>
+</section>
 
 
 <section class="hole-section" id="hole1" data-hole="1">
@@ -670,19 +673,16 @@ function renderMap(holeKey) {
 
 // ── Core: show one hole ───────────────────────────────────────────────────
 function showHole(h, pushState) {
-  // Hide current
-  const prev = document.querySelector('.hole-section.active');
-  if (prev) prev.classList.remove('active');
+  // Hide everything (scorecard + all hole sections)
+  document.querySelectorAll('.hole-section').forEach(s => s.classList.remove('active'));
 
-  // Show new
+  // Show new hole
   const next = document.getElementById('hole' + h);
   if (!next) return;
   next.classList.add('active');
   _currentHole = h;
 
-  // Scroll to top of hole section (below sticky nav)
-  const navH = (document.getElementById('hole-nav') || {}).offsetHeight || 0;
-  const scH  = (document.getElementById('scorecard-section') || {}).offsetHeight || 0;
+  // Scroll to top
   window.scrollTo({ top: 0, behavior: 'instant' });
 
   // Nav highlight
@@ -697,13 +697,24 @@ function showHole(h, pushState) {
   requestAnimationFrame(() => { setTimeout(() => renderMap(h), 80); });
 }
 
+// ── Show scorecard landing ────────────────────────────────────────────────
+function showScorecard() {
+  document.querySelectorAll('.hole-section').forEach(s => s.classList.remove('active'));
+  const sc = document.getElementById('scorecard-section');
+  if (sc) sc.classList.add('active');
+  _currentHole = null;
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  setActiveNav('SC');
+  const counter = document.getElementById('hole-counter');
+  if (counter) counter.textContent = '';
+}
+
 // ── Password gate ────────────────────────────────────────────────────────
 function showApp() {
   document.getElementById('gate').style.display = 'none';
   document.getElementById('app').style.display  = 'block';
-  // Collapse scorecard by default on mobile for cleaner entry
   requestAnimationFrame(() => {
-    showHole(HOLE_ORDER[0]);
+    showScorecard();
   });
 }
 function checkPw() {
@@ -734,8 +745,10 @@ function goHole(h) {
 function setActiveNav(h) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const a = document.querySelector('[data-h="' + h + '"]');
-  if (a) a.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
-  if (a) a.classList.add('active');
+  if (a) {
+    a.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+    a.classList.add('active');
+  }
 }
 
 // ── Resize / orientation change ──────────────────────────────────────────
