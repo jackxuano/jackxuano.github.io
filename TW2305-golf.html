@@ -138,30 +138,23 @@ html,body{background:#e8e3da;font-family:'DM Sans',sans-serif;color:var(--text)}
 <body>
 
 <!-- PASSCODE -->
-<div id="gate" style="position:fixed;inset:0;z-index:9999;background:#0c1a35;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  font-family:'DM Sans',sans-serif;padding:20px">
-  <div style="text-align:center;margin-bottom:28px">
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:48px;color:#fff;letter-spacing:.06em;line-height:1">國華球場</div>
-    <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:.12em;margin-top:5px">PRIVATE · CADDIE GUIDE · 23 MAY 2026</div>
-  </div>
-  <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
-    border-radius:14px;padding:24px;width:100%;max-width:300px;text-align:center">
-    <div style="font-size:10px;font-weight:600;letter-spacing:.1em;color:rgba(255,255,255,0.38);margin-bottom:12px">ENTER PASSCODE</div>
-    <input id="pwi" type="password" placeholder="••••••••••••••"
-      style="width:100%;padding:11px 12px;border-radius:8px;
-        border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);
-        color:#fff;font-size:16px;font-family:'DM Sans',sans-serif;
-        text-align:center;outline:none;margin-bottom:10px"
-      onkeydown="if(event.key==='Enter')chk()">
-    <button onclick="chk()" style="width:100%;padding:11px 0;border-radius:8px;border:none;
-      background:#5cb85c;color:#fff;font-size:14px;font-weight:600;
-      font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:8px">Enter</button>
-    <div id="pwe" style="font-size:11px;color:#f87171;min-height:14px"></div>
-  </div>
-  <div style="margin-top:20px;font-size:10px;color:rgba(255,255,255,0.2);text-align:center;line-height:1.6">
-    Made for fun · 23 May 2026 only 🍺
-  </div>
+<style>
+#gate{position:fixed;inset:0;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 60%,#0f172a 100%);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:30px;text-align:center;font-family:'DM Sans',sans-serif}
+#gate h1{font-size:2em;color:#f0c040;letter-spacing:.04em;line-height:1.15}
+#gate .tagline{color:#94a3b8;font-size:1em}
+#gate input{padding:12px 20px;font-size:1.1em;border-radius:8px;border:2px solid #334155;background:#1e293b;color:#fff;width:min(260px,85vw);text-align:center;outline:none;font-family:'DM Sans',sans-serif}
+#gate input:focus{border-color:#f0c040}
+#gate button{padding:12px 32px;background:#f0c040;color:#0f172a;border:none;border-radius:8px;font-size:1.05em;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif}
+#gate button:hover{opacity:.85}
+#pwe{color:#f87171;font-size:.9em;min-height:1.2em}
+</style>
+<div id="gate">
+  <div style="font-size:3em">⛳</div>
+  <h1>國華球場<br><span style="font-size:.58em;color:#7dd3fc">Kuo Hua Golf &amp; CC</span></h1>
+  <div class="tagline">Made for fun · 23 May 2026 only 🍺</div>
+  <input id="pwi" type="password" placeholder="Enter password" onkeydown="if(event.key==='Enter')chk()">
+  <button onclick="chk()">Enter 🏌️</button>
+  <div id="pwe"></div>
 </div>
 <script>
 function chk(){
@@ -169,9 +162,10 @@ function chk(){
     document.getElementById('gate').style.display='none';
     sessionStorage.setItem('kh','1');
   }else{
-    document.getElementById('pwe').textContent='Wrong password.';
+    document.getElementById('pwe').textContent='❌ Wrong password — ask Jack for a beer hint';
     document.getElementById('pwi').value='';
-    setTimeout(()=>document.getElementById('pwe').textContent='',2000);
+    document.getElementById('pwi').focus();
+    setTimeout(()=>document.getElementById('pwe').textContent='',2500);
   }
 }
 if(sessionStorage.getItem('kh')==='1')
